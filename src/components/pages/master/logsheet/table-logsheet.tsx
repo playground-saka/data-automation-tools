@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { HTMLAttributes, HtmlHTMLAttributes, useContext, useEffect, useState } from 'react'
 
 import {
   ColumnDef,
@@ -30,132 +30,275 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { EyeIcon } from '@heroicons/react/24/outline'
+import { LogSheetontext } from '../../../providers/LogSheetProvider'
+import { getLogsheet, postLogsheetManual, postLogsheetSistem } from '@/app/api/logsheet'
+import { formatDateTime } from '@/utils/formatter'
+import { ToastAction } from '@radix-ui/react-toast'
+import { toast } from '@/components/ui/use-toast'
+import * as XLSX from 'xlsx';
 
 type Props = {}
 
-type Logsheet = {
-  id: number
-  name: string
-  kategori: "PLTM" | "PLTMH" | "PLTMS"
-  date: string
-  logsheetManual: "uploaded" | "not-uploaded"
-  logsheetSistem: "uploaded" | "not-uploaded"
-}
-
-const data: Logsheet[] = [
-  {
-    id: 53277,
-    name: 'CIROMPANG',
-    kategori: 'PLTMH',
-    date: 'Juli 2024',
-    logsheetManual: 'uploaded',
-    logsheetSistem: 'uploaded',
-  },
-  {
-    id: 53277,
-    name: 'PESANTREN',
-    kategori: 'PLTM',
-    date: 'Juli 2024',
-    logsheetManual: 'uploaded',
-    logsheetSistem: 'not-uploaded',
-  },
-]
-
-export const columns: ColumnDef<Logsheet>[] = [
-  {
-    accessorKey: "date",
-    header: () => {
-      return (
-        <div
-          className='flex flex-row gap-1 items-center text-xs'
-        >
-          Date
-        </div>
-      )
-    },
-    cell: ({ row }) => (
-      <div className="text-xs">{row.getValue("date")}</div>
-    ),
-    enableHiding: false,
-  },
-  {
-    accessorKey: "name",
-    header: ({ column }) => {
-      return (
-        <div
-          className='flex flex-row gap-1 items-center cursor-pointer text-xs'
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Name
-          <ArrowUpDown className="h-3 w-3" />
-        </div>
-      )
-    },
-    cell: ({ row }: any) => {
-      const name = row.getValue("name");
-      const kategori = row.original.kategori;
-
-      return(
-        <div className="text-xs">{kategori} - {name}</div>
-      )
-    },
-    enableSorting: true,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "logsheetManual",
-    header: ({ column }) => {
-      return (
-        <div
-          className='flex flex-row gap-1 items-center cursor-pointer text-xs'
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Logsheet Manual
-          <ArrowUpDown className="h-3 w-3" />
-        </div>
-      )
-    },
-    cell: ({ row }) => (
-      <div className={`
-      rounded-md px-2 py-1 w-fit
-      ${row.getValue("logsheetManual") === 'uploaded' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-500'}
-    `}>
-      <p className='capitalize text-xs text-center'>
-        {row.getValue("logsheetManual")}
-      </p>
-    </div>
-    ),
-    enableSorting: true,
-  },
-  {
-    accessorKey: "logsheetSistem",
-    header: ({ column }) => {
-      return (
-        <div
-          className='flex flex-row gap-1 items-center cursor-pointer text-xs'
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Logsheet Sistem
-          <ArrowUpDown className="h-3 w-3" />
-        </div>
-      )
-    },
-    cell: ({ row }) => (
-      <div className={`
-      rounded-md px-2 py-1 w-fit
-      ${row.getValue("logsheetSistem") === 'uploaded' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-500'}
-    `}>
-      <p className='capitalize text-xs text-center'>
-        {row.getValue("logsheetSistem")}
-      </p>
-    </div>
-    ),
-    enableSorting: true,
-  },
-]
-
 function TableLogsheet({}: Props) {
+  const onChangeFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault()
+    let id = e.currentTarget.id
+    let selectedFile: File | null = null
+    if (e.currentTarget && e.currentTarget.files && e.currentTarget.files.length > 0) selectedFile = e.currentTarget.files[0];
+    let allowFileTypes = [ "text/csv", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
+    if (selectedFile) {
+      if (!allowFileTypes.includes(selectedFile.type)) {
+        toast({
+          title: "Error",
+          description: "File type not allowed",
+          action: <ToastAction altText="Dismiss">Dismiss</ToastAction>,
+        });
+      } else {
+        let typeImport = e.currentTarget.id.split("_")[2];
+        let pelangganId = e.currentTarget.id.split("_")[1];
+        let reader = new FileReader();
+        reader.readAsArrayBuffer(selectedFile);
+        reader.onload = async(e) => {
+          const bstr = e.target?.result;
+          const wb = XLSX.read(bstr, { type: "binary" });
+          const wsname = wb.SheetNames[0];
+          const ws = wb.Sheets[wsname];
+          const dataExcel:any[] = XLSX.utils.sheet_to_json(ws, {
+            header: 1,
+          });
+
+          // Temukan baris pertama yang memiliki data
+          let firstDataRowIndex = 0;
+          for (let i = 0; i < dataExcel.length; i++) {
+            if (dataExcel[i].some( (cell: any) => cell !== undefined && cell !== null && cell !== "")) {
+              firstDataRowIndex = i;
+              break;
+            }
+          }
+          const jsonData: any[] = dataExcel.splice(firstDataRowIndex, 4);
+          
+          let formData = new FormData();
+          formData.append("file", selectedFile);
+          formData.append("pelangganId", pelangganId);
+          let input = document.getElementById(id) as HTMLInputElement | null;
+
+          if (typeImport == "manual") {
+            if (jsonData.length !== 4 && jsonData[3].length !== 12) {
+              toast({
+                title: "Gagal",
+                description: "Terdapat data yang tidak sesuai"
+              });
+            }else{
+              await postLogsheetManual(formData)
+              .then((res) => {
+                toast({
+                  title: "Sukses",
+                  description: "File berhasil diupload",
+                });
+                fetchData();
+              }).catch((err) => {
+                if (input) input.value = "";
+                toast({
+                  title: "Gagal",
+                  description: err.response.data.message
+                });
+              })
+            }
+          } else {
+            if (jsonData.length !== 4 && jsonData[3].length !== 14) {
+               toast({
+                title: "Gagal",
+                description: "Terdapat data yang tidak sesuai"
+              });
+            }else{
+              await postLogsheetSistem(formData)
+              .then((res) => {
+                toast({
+                  title: "Sukses",
+                  description: "File berhasil diupload"
+                });
+                fetchData();
+              })
+              .catch((err)=>{
+                if (input) input.value = "";
+                toast({
+                  title: "Gagal",
+                  description: err.response.data.message
+                });
+              })
+            }
+          }
+        };
+      }
+  
+    }else{
+      toast({
+        title: "Error",
+        description: "File not found",
+        action: <ToastAction altText="Dismiss">Dismiss</ToastAction>,
+      });
+    }
+  
+  }
+  const columns: ColumnDef<Model.LogSheet.LogSheetData>[] = [
+    {
+      accessorKey: "date",
+      header: () => {
+        return (
+          <div className="flex flex-row gap-1 items-center text-xs">
+            Tanggal
+          </div>
+        );
+      },
+      cell: ({ row }) => (
+        <div className="text-xs">
+          {formatDateTime(row.getValue("date"), "m-Y")}
+        </div>
+      ),
+      enableHiding: false,
+    },
+    {
+      accessorKey: "namaPelanggan",
+      accessorFn: (row) =>
+        row.pelanggan.kategori.namaKategori +
+        " - " +
+        row.pelanggan.namaPelanggan,
+      header: ({ column }) => {
+        return (
+          <div
+            className="flex flex-row gap-1 items-center cursor-pointer text-xs"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Nama Pelanggan
+            <ArrowUpDown className="h-3 w-3" />
+          </div>
+        );
+      },
+      cell: ({ row }: any) => {
+        const name = row.getValue("namaPelanggan");
+
+        return <div className="text-xs">{name}</div>;
+      },
+      enableSorting: true,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "logsheetManual",
+      header: ({ column }) => {
+        return (
+          <div
+            className="flex flex-row gap-1 items-center cursor-pointer text-xs"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Logsheet Manual
+            <ArrowUpDown className="h-3 w-3" />
+          </div>
+        );
+      },
+      cell: ({ row }) => (
+        <div
+          className={`
+        rounded-md px-2 py-1 w-fit
+        ${
+          row.getValue("logsheetManual")
+            ? "bg-indigo-100 text-indigo-700"
+            : "bg-gray-100 text-gray-500"
+        }
+      `}
+        >
+          {row.getValue("logsheetManual") ? (
+            <p className="capitalize text-xs text-center">Uploaded</p>
+          ) : (
+            <div className="cursor-pointer">
+              <input
+                id={`${row.original.id}_${row.original.pelanggan.id}_manual`}
+                type="file"
+                className="hidden"
+                name={`${row.original.id}_${row.original.pelanggan.id}_manual`}
+                onChange={onChangeFile}
+              />
+              <label
+                htmlFor={`${row.original.id}_${row.original.pelanggan.id}_manual`}
+                className="text-xs cursor-pointer"
+              >
+                Belum di Upload
+              </label>
+            </div>
+          )}
+        </div>
+      ),
+      enableSorting: true,
+    },
+    {
+      accessorKey: "logsheetSistem",
+      header: ({ column }) => {
+        return (
+          <div
+            className="flex flex-row gap-1 items-center cursor-pointer text-xs"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Logsheet Sistem
+            <ArrowUpDown className="h-3 w-3" />
+          </div>
+        );
+      },
+      cell: ({ row }) => (
+        <div
+          className={`rounded-md px-2 py-1 w-fit
+        ${
+          row.getValue("logsheetSistem")
+            ? "bg-indigo-100 text-indigo-700"
+            : "bg-gray-100 text-gray-500"
+        }
+      `}
+        >
+          {row.getValue("logsheetSistem") ? (
+            <p className="capitalize text-xs text-center">Uploaded</p>
+          ) : (
+            <div className="cursor-pointer">
+              <input
+                id={`${row.original.id}_${row.original.pelanggan.id}_sistem`}
+                type="file"
+                className="hidden"
+                name={`${row.original.id}_${row.original.pelanggan.id}_sistem`}
+                onChange={onChangeFile}
+              />
+              <label
+                htmlFor={`${row.original.id}_${row.original.pelanggan.id}_sistem`}
+                className="text-xs cursor-pointer"
+              >
+                Belum di Upload
+              </label>
+            </div>
+          )}
+        </div>
+      ),
+      enableSorting: true,
+    },
+  ];
+  const [data,setData] = useState<Model.DataTable.ResponseDt<Model.LogSheet.LogSheetData[]>>()
+  const { triggerFetch } = useContext(LogSheetontext);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [perPage, setPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const fetchData = async () => {
+    setLoading(true);
+    await getLogsheet(currentPage, perPage)
+    .then((res) => {
+      setData(res);
+      setTotalPages(res.total_pages); 
+    })
+    .catch((err) => {
+      console.log(err);
+    }).finally(() => {
+      setLoading(false);
+    });
+  };
+useEffect(() => {
+  fetchData();
+}, [triggerFetch, currentPage, perPage]);
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -165,12 +308,11 @@ function TableLogsheet({}: Props) {
   const [rowSelection, setRowSelection] = React.useState({})
 
   const table = useReactTable({
-    data,
+    data: data?.data ?? [],
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
@@ -188,15 +330,17 @@ function TableLogsheet({}: Props) {
       <div className="flex items-center py-4">
         <Input
           placeholder="cari berdasarkan nama..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          value={
+            (table.getColumn("namaPelanggan")?.getFilterValue() as string) ?? ""
+          }
           onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
+            table.getColumn("namaPelanggan")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button type='button' variant="outline" className="ml-auto">
               Columns <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -216,7 +360,7 @@ function TableLogsheet({}: Props) {
                   >
                     {column.id}
                   </DropdownMenuCheckboxItem>
-                )
+                );
               })}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -236,7 +380,7 @@ function TableLogsheet({}: Props) {
                             header.getContext()
                           )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -276,23 +420,23 @@ function TableLogsheet({}: Props) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            onClick={() => setCurrentPage(data?.prev_page ? data?.prev_page : 1)}
+            disabled={!data?.per_page || data?.current_page === 1}
           >
             Previous
           </Button>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            onClick={() => setCurrentPage(data?.next_page ? data?.next_page : 1)}
+            disabled={!data?.next_page}
           >
             Next
           </Button>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default TableLogsheet

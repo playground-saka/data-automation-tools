@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import {
   ColumnDef,
@@ -32,6 +32,8 @@ import {
 } from "@/components/ui/table"
 import { EyeIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
+import { getLogsheet } from '@/app/api/logsheet'
+import { formatDateTime } from '@/utils/formatter'
 
 type Props = {}
 
@@ -43,119 +45,109 @@ type Logsheet = {
   status: "ready" | "not-ready"
 }
 
-const data: Logsheet[] = [
-  {
-    id: 53277,
-    name: 'CIROMPANG',
-    kategori: 'PLTMH',
-    date: 'Juli 2024',
-    status: "ready"
-  },
-  {
-    id: 53277,
-    name: 'PESANTREN',
-    kategori: 'PLTM',
-    date: 'Juli 2024',
-    status: "not-ready"
-  },
-]
-
-export const columns: ColumnDef<Logsheet>[] = [
+export const columns: ColumnDef<Model.LogSheet.LogSheetData>[] = [
   {
     accessorKey: "date",
     header: () => {
       return (
-        <div
-          className='flex flex-row gap-1 items-center text-xs'
-        >
-          Date
-        </div>
-      )
+        <div className="flex flex-row gap-1 items-center text-xs">Tanggal</div>
+      );
     },
     cell: ({ row }) => (
-      <div className="text-xs">{row.getValue("date")}</div>
+      <div className="text-xs">
+        {formatDateTime(row.getValue("date"), "m-Y")}
+      </div>
     ),
     enableHiding: false,
   },
   {
-    accessorKey: "name",
+    accessorKey: "namaPelanggan",
+    accessorFn: (row) =>
+      row.pelanggan.kategori.namaKategori + " - " + row.pelanggan.namaPelanggan,
     header: ({ column }) => {
       return (
         <div
-          className='flex flex-row gap-1 items-center cursor-pointer text-xs'
+          className="flex flex-row gap-1 items-center cursor-pointer text-xs"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Name
+          Nama Pelanggan
           <ArrowUpDown className="h-3 w-3" />
         </div>
-      )
+      );
     },
     cell: ({ row }: any) => {
       const name = row.getValue("name");
       const kategori = row.original.kategori;
 
-      return(
-        <div className="text-xs">{kategori} - {name}</div>
-      )
+      return <div className="text-xs">{row.getValue("namaPelanggan")}</div>;
     },
     enableSorting: true,
     enableHiding: false,
   },
   {
     accessorKey: "status",
+    accessorFn: (row) =>
+      row.logsheetManual && row.logsheetSistem ? "Ready" : "Not Ready",
     header: ({ column }) => {
       return (
         <div
-          className='flex flex-row gap-1 items-center cursor-pointer text-xs'
+          className="flex flex-row gap-1 items-center cursor-pointer text-xs"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Status
           <ArrowUpDown className="h-3 w-3" />
         </div>
-      )
+      );
     },
-    cell: ({ row }) => (
-      <div className={`
-      rounded-md px-2 py-1 w-fit
-      ${row.getValue("status") === 'ready' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-500'}
-    `}>
-      <p className='capitalize text-xs text-center'>
-        {row.getValue("status")}
-      </p>
-    </div>
-    ),
+    cell: ({ row }: any) => {
+      return (
+        <div
+          className={`rounded-md px-2 py-1 w-fit ${
+            row.getValue("statusPelanggan")
+              ? "bg-indigo-100 text-indigo-700"
+              : "bg-gray-100 text-gray-500"
+          }`}
+        >
+          {row.getValue("status")}
+        </div>
+      );
+    },
     enableSorting: true,
+    enableHiding: false,
   },
   {
     id: "actions",
     enableHiding: false,
-    cell: ({row}) => {
-      const id = row.original.id;
-      const status = row.original.status;
+    cell: ({ row }) => {
+      const pelanggan_id = row.original.pelanggan.id;
+      const status = row.original.logsheetManual && row.original.logsheetSistem;
 
       return (
         <>
-        {
-          status === 'ready' ? (
+          {status || true ? (
             <Link
-              href={`/analisis-data/selisih/${id}`}
-              className='p-2 w-fit flex justify-end cursor-pointer'
+              href={`/analisis-data/selisih/${pelanggan_id}?date=${row.original.month}-${row.original.years}`}
+              className="p-2 w-fit flex justify-end cursor-pointer"
             >
-              <EyeIcon className='w-4 h-4' />
+              <EyeIcon className="w-4 h-4" />
             </Link>
           ) : (
-            <div className='p-2 w-fit flex justify-end'>
-              <EyeOffIcon className='w-4 h-4 text-stone-800/75' />
+            <div className="p-2 w-fit flex justify-end">
+              <EyeOffIcon className="w-4 h-4 text-stone-800/75" />
             </div>
-          )
-        }
+          )}
         </>
-      )
+      );
     },
   },
-]
+];
 
 function TableSelisih({}: Props) {
+  const [data,setData] = React.useState<Model.DataTable.ResponseDt<Model.LogSheet.LogSheetData[]>>()
+  const [loading, setLoading] = React.useState(false);
+  const [currentPage, setCurrentPage] = React.useState<number>(1);
+  const [perPage, setPerPage] = React.useState(10);
+  const [totalPages, setTotalPages] = React.useState(0);
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -165,7 +157,7 @@ function TableSelisih({}: Props) {
   const [rowSelection, setRowSelection] = React.useState({})
 
   const table = useReactTable({
-    data,
+    data: data?.data ?? [],
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -181,7 +173,24 @@ function TableSelisih({}: Props) {
       columnVisibility,
       rowSelection,
     },
-  })
+  });
+  const fetchData = async () => {
+    setLoading(true);
+    await getLogsheet(currentPage, perPage)
+      .then((res) => {
+        setData(res);
+        setTotalPages(res.total_pages);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }
+  useEffect(() => {
+    fetchData() 
+  }, [])
   
   return (
     <div className="w-full">

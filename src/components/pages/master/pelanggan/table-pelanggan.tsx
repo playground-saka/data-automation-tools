@@ -1,5 +1,4 @@
-import React from 'react'
-
+import React, { useContext, useEffect, useState } from 'react'
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -31,111 +30,81 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { PencilIcon } from '@heroicons/react/24/outline'
+import { getCustomers } from '@/app/api/customer'
+import { PelangganContext } from '../../../providers/PelangganProvider'
 
 type Props = {}
 
-type Pelanggan = {
-  id: number
-  name: string
-  kategori: "PLTM" | "PLTMH" | "PLTMS"
-  status: "active" | "inactive"
-}
-
-const data: Pelanggan[] = [
+export const columns: ColumnDef<Model.Customer.CustomerData>[] = [
   {
-    id: 53277,
-    name: 'CIROMPANG',
-    kategori: 'PLTMH',
-    status: 'active',
-  },
-  {
-    id: 53277,
-    name: 'PESANTREN',
-    kategori: 'PLTM',
-    status: 'active',
-  },
-]
-
-export const columns: ColumnDef<Pelanggan>[] = [
-  {
-    accessorKey: "id",
+    id: "pelangganId",
+    accessorKey: "pelangganId",
     header: ({ column }) => {
       return (
         <div
-          className='flex flex-row gap-1 items-center cursor-pointer text-xs'
+          className="flex flex-row gap-1 items-center cursor-pointer text-xs"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           ID
           <ArrowUpDown className="h-3 w-3" />
         </div>
-      )
+      );
     },
     cell: ({ row }) => (
-      <div className="text-xs">{row.getValue("id")}</div>
+      <div className="text-xs">{row.getValue("pelangganId")}</div>
     ),
     enableSorting: true,
     enableHiding: false,
   },
   {
-    accessorKey: "name",
+    accessorKey: "namaPelanggan",
     header: ({ column }) => {
       return (
         <div
-          className='flex flex-row gap-1 items-center cursor-pointer text-xs'
+          className="flex flex-row gap-1 items-center cursor-pointer text-xs"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Name
+          Nama Pelanggan
           <ArrowUpDown className="h-3 w-3" />
         </div>
-      )
+      );
     },
-    cell: ({ row }) => (
-      <div className="text-xs">{row.getValue("name")}</div>
-    ),
+    cell: ({ row }: any) => {
+      const kategori = row.getValue("pelangganId");
+      return <div className="text-xs">{`${row.original.kategori.namaKategori} - ${row.getValue("namaPelanggan")}`}</div>;
+    },
     enableSorting: true,
     enableHiding: false,
   },
   {
-    accessorKey: "kategori",
+    id: "statusPelanggan",
+    accessorKey: "statusPelanggan",
     header: ({ column }) => {
       return (
         <div
-          className='flex flex-row gap-1 items-center cursor-pointer text-xs'
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Kategori
-          <ArrowUpDown className="h-3 w-3" />
-        </div>
-      )
-    },
-    cell: ({ row }) => (
-      <div className="text-xs">{row.getValue("kategori")}</div>
-    ),
-    enableSorting: true,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "status",
-    header: ({ column }) => {
-      return (
-        <div
-          className='flex flex-row gap-1 items-center cursor-pointer text-xs'
+          className="flex flex-row gap-1 items-center cursor-pointer text-xs"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Status
           <ArrowUpDown className="h-3 w-3" />
         </div>
-      )
+      );
     },
     cell: ({ row }) => (
-      <div className={`
+      <div
+        className={`
       rounded-md px-2 py-1 w-fit
-      ${row.getValue("status") === 'active' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-500'}
-    `}>
-      <p className='capitalize text-xs text-center'>
-        {row.getValue("status")}
-      </p>
-    </div>
+      ${
+        row.getValue("statusPelanggan")
+          ? "bg-indigo-100 text-indigo-700"
+          : "bg-gray-100 text-gray-500"
+      }
+    `}
+      >
+        <p className="capitalize text-xs text-center">
+          {row.getValue("statusPelanggan") ? "Aktif" : "Tidak Aktif"}
+        </p>
+      </div>
     ),
     enableSorting: true,
   },
@@ -144,15 +113,21 @@ export const columns: ColumnDef<Pelanggan>[] = [
     enableHiding: false,
     cell: () => {
       return (
-        <div className='p-2 w-fit flex justify-end cursor-pointer'>
-          <PencilIcon className='w-4 h-4' />
+        <div className="p-2 w-fit flex justify-end cursor-pointer">
+          <PencilIcon className="w-4 h-4" />
         </div>
-      )
+      );
     },
   },
-]
+];
 
 function TablePelanggan({}: Props) {
+  const { triggerFetch } = useContext(PelangganContext);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loading, setLoading] = useState(false);
+
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -161,13 +136,29 @@ function TablePelanggan({}: Props) {
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
 
+  const [data,setData] = useState<Model.DataTable.ResponseDt<Model.Customer.CustomerData[]>>()
+
+  const fetchDataCustomer = async () => {
+    setLoading(true)
+    await getCustomers(perPage, currentPage)
+      .then((res) => {
+        setData(res);
+      })
+      .catch((err) => {})
+      .finally(() => {
+        setLoading(false);
+      });
+  }
+  useEffect(() => {
+    fetchDataCustomer();
+  }, [triggerFetch, currentPage, perPage]);
+
   const table = useReactTable({
-    data,
+    data: data?.data || [],
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
@@ -185,9 +176,11 @@ function TablePelanggan({}: Props) {
       <div className="flex items-center py-4">
         <Input
           placeholder="cari berdasarkan nama..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          value={
+            (table.getColumn("namaPelanggan")?.getFilterValue() as string) ?? ""
+          }
           onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
+            table.getColumn("namaPelanggan")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
@@ -213,7 +206,7 @@ function TablePelanggan({}: Props) {
                   >
                     {column.id}
                   </DropdownMenuCheckboxItem>
-                )
+                );
               })}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -233,7 +226,7 @@ function TablePelanggan({}: Props) {
                             header.getContext()
                           )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -271,25 +264,31 @@ function TablePelanggan({}: Props) {
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="space-x-2">
           <Button
+            type='button'
             variant="outline"
             size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            onClick={() =>
+              setCurrentPage(data?.prev_page ? data?.prev_page : 1)
+            }
+            disabled={!data?.prev_page}
           >
             Previous
           </Button>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            type='button'
+            onClick={() =>
+              setCurrentPage(data?.next_page ? data?.next_page : 1)
+            }
+            disabled={!data?.next_page}
           >
             Next
           </Button>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default TablePelanggan

@@ -6,6 +6,8 @@ import NextTopLoader from 'nextjs-toploader';
 import "../globals.css";
 
 import Sidebar from "@/components/shared/sidebar";
+import ReduxProvider from "@/components/providers/ReduxProvider";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={inter.className} suppressHydrationWarning>
         <NextTopLoader
           color="#4f46e5"
           initialPosition={0.08}
@@ -42,7 +44,8 @@ export default function RootLayout({
           zIndex={1600}
           showAtBottom={false}
         />
-        <main className="flex">
+        <ReduxProvider>
+          <main className="flex">
           <Sidebar />
           <div className="relative flex-1 ml-[18rem] min-h-screen">
             {children}
@@ -52,6 +55,8 @@ export default function RootLayout({
             </footer>
           </div>
         </main>
+      </ReduxProvider>
+      <Toaster/>
       </body>
     </html>
   );

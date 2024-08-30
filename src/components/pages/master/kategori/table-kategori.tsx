@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect } from "react";
 
 import {
   ColumnDef,
@@ -11,17 +11,17 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown } from "lucide-react"
+} from "@tanstack/react-table";
+import { ArrowUpDown, ChevronDown } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -29,126 +29,96 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { getFormulas } from '@/app/api/formula'
-import { FormulaContext } from '../../../providers/FormulaProvider'
-import { toast } from '@/components/ui/use-toast'
+} from "@/components/ui/table";
+import { KategoriContext } from "../../../providers/KategoriProvider";
+import { getCategories } from "@/app/api/category";
+import { toast } from "@/components/ui/use-toast";
 
-type Props = {}
-
-type Formula = {
-  id: number
-  name: string
-  kategori: "PLTM" | "PLTMH" | "PLTMS"
-  formula: string
-}
-
-export const columns: ColumnDef<Model.Formula.FormulaData>[] = [
-  {
-    accessorKey: "namaPelanggan",
-    accessorFn: (row) => row.pelanggan.namaPelanggan,
-    header: ({ column }) => {
-      return (
-        <div
-          className="flex flex-row gap-1 items-center cursor-pointer text-xs"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Nama Pelanggan
-          <ArrowUpDown className="h-3 w-3" />
-        </div>
-      );
+type Props = {};
+function TableKategori({}: Props) {
+  const columns: ColumnDef<Model.Category.CategoryData>[] = [
+    {
+      id: "namaKategori",
+      accessorKey: "namaKategori",
+      header: ({ column }) => {
+        return (
+          <div
+            className="flex flex-row gap-1 items-center cursor-pointer text-xs"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Nama Kategori
+            <ArrowUpDown className="h-3 w-3" />
+          </div>
+        );
+      },
+      cell: ({ row }: any) => {
+        return <div className="text-xs">{row.getValue("namaKategori")}</div>;
+      },
+      enableSorting: true,
+      enableHiding: false,
     },
-    cell: ({ row }: any) => {
-      return <div className="text-xs">{row.getValue("namaPelanggan")}</div>;
+    {
+      id: "statusKategori",
+      accessorKey: "statusKategori",
+      header: ({ column }) => {
+        return (
+          <div
+            className="flex flex-row gap-1 items-center cursor-pointer text-xs"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Status
+            <ArrowUpDown className="h-3 w-3" />
+          </div>
+        );
+      },
+      cell: ({ row }: any) => {
+        const status = row.getValue("statusKategori");
+        return (
+          <div
+            className={`
+            rounded-md px-2 py-1 w-fit
+            ${
+              status
+                ? "bg-indigo-100 text-indigo-700"
+                : "bg-gray-100 text-gray-500"
+            }
+          `}
+          >
+            <p className="capitalize text-xs text-center">
+              {status ? "Aktif" : "Tidak Aktif"}
+            </p>
+          </div>
+        );
+      },
+      enableSorting: true,
     },
-    enableSorting: true,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "faktorArus",
-    header: ({ column }) => {
-      return (
-        <div
-          className="flex flex-row gap-1 items-center cursor-pointer text-xs"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Faktor Arus
-          <ArrowUpDown className="h-3 w-3" />
-        </div>
-      );
-    },
-    cell: ({ row }: any) => {
-      return <div className="text-xs">{row.getValue("faktorArus")}</div>;
-    },
-    enableSorting: true,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "faktorTegangan",
-    header: ({ column }) => {
-      return (
-        <div
-          className="flex flex-row gap-1 items-center cursor-pointer text-xs"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Faktor Tegangan
-          <ArrowUpDown className="h-3 w-3" />
-        </div>
-      );
-    },
-    cell: ({ row }: any) => {
-      return <div className="text-xs">{row.getValue("faktorTegangan")}</div>;
-    },
-    enableSorting: true,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "faktorPower",
-    header: ({ column }) => {
-      return (
-        <div
-          className="flex flex-row gap-1 items-center cursor-pointer text-xs"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Faktor Tegangan
-          <ArrowUpDown className="h-3 w-3" />
-        </div>
-      );
-    },
-    cell: ({ row }: any) => {
-      return <div className="text-xs">{row.getValue("faktorPower")}</div>;
-    },
-    enableSorting: true,
-    enableHiding: false,
-  },
-];
-
-function TableFormula({}: Props) {
-  const [data,setData] = useState<Model.Formula.FormulaData[]>([])
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  ];
+  const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
-  )
+  );
+  const [data, setData] = React.useState<Model.Category.CategoryData[]>([]);
+  const [loading, setLoading] = React.useState(false);
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
+    React.useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = React.useState({});
+  const { triggerFetch } = useContext(KategoriContext);
 
-  const { triggerFetch } = useContext(FormulaContext);
-
-  const fetchData = async() => {
-    await getFormulas()
-    .then((res) => {
-      setData(res)
-    })
-    .catch((err) => {
-      console.log(err);
-      
-      toast({
-        title: "Error",
-        description: err.response.data.message,
+  const fetchData = async () => {
+    setLoading(true);
+    await getCategories()
+      .then((res) => {
+        setData(res);
       })
-    })
-  }
+      .catch((err) => {
+        toast({
+          title: "Error",
+          description: err.response.data.message
+        })
+      }).finally(() => {
+        setLoading(false);
+      });
+  };
 
   useEffect(() => {
     fetchData();
@@ -171,24 +141,22 @@ function TableFormula({}: Props) {
       columnVisibility,
       rowSelection,
     },
-  })
-  
+  });
+
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
         <Input
           placeholder="cari berdasarkan nama..."
-          value={
-            (table.getColumn("namaPelanggan")?.getFilterValue() as string) ?? ""
-          }
+          value={(table.getColumn("namaKategori")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("namaPelanggan")?.setFilterValue(event.target.value)
+            table.getColumn("namaKategori")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button type='button' variant="outline" className="ml-auto">
+            <Button type="button" variant="outline" className="ml-auto">
               Columns <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -266,7 +234,7 @@ function TableFormula({}: Props) {
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="space-x-2">
           <Button
-            type='button'
+            type="button"
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
@@ -275,7 +243,7 @@ function TableFormula({}: Props) {
             Previous
           </Button>
           <Button
-            type='button'
+            type="button"
             variant="outline"
             size="sm"
             onClick={() => table.nextPage()}
@@ -289,4 +257,4 @@ function TableFormula({}: Props) {
   );
 }
 
-export default TableFormula
+export default TableKategori;

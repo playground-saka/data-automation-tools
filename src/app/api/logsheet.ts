@@ -32,3 +32,14 @@ export async function postLogsheetSistem(payload: FormData): Promise<any> {
   });
   return response.data;
 }
+
+export async function exportDifferentLogsheet(pelangganId:number,date:string): Promise<Blob> {
+  const response = await axiosInstance.get(`/download-selisih?download=true&pelanggan_id=${pelangganId}&date=${date}`,{
+    responseType: 'blob',
+    headers: {
+      "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }
+  });
+  
+  return response.data;
+}

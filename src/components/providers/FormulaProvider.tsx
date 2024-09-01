@@ -3,20 +3,19 @@ import React, { createContext, useState, useCallback } from "react";
 export const FormulaContext = createContext({} as any);
 
 export const FormulaProvider = ({ children }:{children: React.ReactNode}) => {
-  const [openForm, setOpenForm] = useState(false);
   const [triggerFetch, setTriggerFetch] = useState(false);
+  const [openDialogDelete, setOpenDialogDelete] = useState(false);
+  const [formula, setFormula] = useState<Model.Formula.FormulaData | null>(null);
+
+
 
   const triggerFetchData = useCallback(() => {
     setTriggerFetch((prev) => !prev);
   }, []);
 
-  const triggerOpenForm = useCallback(() => {
-    setOpenForm((prev) => !prev);
-  }, []);
-
   return (
     <FormulaContext.Provider
-      value={{ triggerFetchData, triggerFetch,triggerOpenForm, openForm }}
+      value={{ triggerFetchData, triggerFetch, setFormula, formula, setOpenDialogDelete, openDialogDelete }}
     >
       {children}
     </FormulaContext.Provider>

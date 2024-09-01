@@ -16,3 +16,12 @@ export async function postCustomer(payload:any): Promise<Model.Customer.Customer
   const response = await axiosInstance.post("/pelanggan", {...payload});
   return response.data;
 }
+
+export async function putCustomer(id:number,payload:any): Promise<Model.Customer.CustomerData> {
+  const response = await axiosInstance.put(`/pelanggan/${id}`, {...payload});
+  return response.data;
+}
+export async function deleteCustomer(id:number): Promise<Model.Customer.CustomerData> {
+  const response = await axiosInstance.delete(`/pelanggan/${id}`);
+  return response.data;
+}

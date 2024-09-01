@@ -7,8 +7,9 @@ export const KategoriProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [openForm, setOpenForm] = useState(false);
+  const [kategori, setKategori] = useState<Model.Category.CategoryData | null>(null);
   const [triggerFetch, setTriggerFetch] = useState(false);
+  const [openDialogDelete, setOpenDialogDelete] = useState(false);
 
   const triggerFetchData = useCallback(() => {
     setTriggerFetch((prev) => !prev);
@@ -20,7 +21,7 @@ export const KategoriProvider = ({
 
   return (
     <KategoriContext.Provider
-      value={{ triggerFetchData, triggerFetch, triggerOpenForm, openForm }}
+      value={{ triggerFetchData, triggerFetch, triggerOpenForm, setKategori, kategori, setOpenDialogDelete, openDialogDelete }}
     >
       {children}
     </KategoriContext.Provider>

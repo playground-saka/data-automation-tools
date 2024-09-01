@@ -19,7 +19,6 @@ import {
   BellIcon,
   BuildingOffice2Icon,
   ChartBarSquareIcon,
-  ArrowLeftEndOnRectangleIcon
 } from "@heroicons/react/24/outline"
 import { Button } from '@/components/ui/button';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
@@ -41,7 +40,7 @@ type MenuItem = {
 const menuList: MenuItem[] = [
   {
     id: 0,
-    label: "Notification",
+    label: "Notifikasi",
     icon: (
       <BellIcon className="h-4 w-4 text-zinc-800/80 group-hover:text-zinc-800" />
     ),
@@ -155,7 +154,7 @@ function Index({}: Props) {
             size={"default"}
             className="w-[100px] px-4 py-3"
           >
-            <ArrowLeftEndOnRectangleIcon scale={2} /> Keluar
+            Keluar
           </Button>
         </div>
       </div>

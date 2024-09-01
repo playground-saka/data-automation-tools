@@ -27,7 +27,7 @@ function Index({}: Props) {
             <div className="flex flex-col">
               <h1>Daftar Logsheet</h1>
               <p className="text-xs text-stone-800/65">
-                Logsheet manual dan sistem
+                Logsheet yang mencakup data manual dan data sistem untuk pemantauan dan pelaporan
               </p>
             </div>
             <SheetTrigger asChild>

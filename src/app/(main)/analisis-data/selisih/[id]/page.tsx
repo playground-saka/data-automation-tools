@@ -20,6 +20,9 @@ function Page({ params }: Props) {
         <h1 className="text-3xl">Analisis Data Selisih</h1>
         <Breadcrumbs />
       </div>
+      <p className="text-md text-stone-800/65">
+        Logsheet yang mencakup data manual dan data sistem untuk pemantauan dan pelaporan
+      </p>
       <Index id={params.id}/>
     </section>
   );

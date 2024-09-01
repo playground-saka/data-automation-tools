@@ -3,7 +3,7 @@ import { z } from "zod";
 export const schemaFormCustomer = z.object({
   pelangganId: z.string({
     required_error: "Pelanggan ID is required",
-    invalid_type_error: "Pelanggan ID must be a number",
+    invalid_type_error: "Pelanggan ID must be a string",
   }),
   namaPelanggan: z.string({
     required_error: "Name is required",
@@ -11,7 +11,7 @@ export const schemaFormCustomer = z.object({
   }),
   kategoriId: z.string({
     required_error: "Category ID is required",
-    invalid_type_error: "Category ID must be a number",
+    invalid_type_error: "Category ID must be a string",
   }),
   statusPelanggan: z.boolean({
     required_error: "Status is required",

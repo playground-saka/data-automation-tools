@@ -1,11 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
@@ -15,6 +14,7 @@ import { PlusIcon } from '@heroicons/react/24/outline'
 import TableFormula from './table-formula'
 import FormFormula from './form-formula'
 import { FormulaContext, FormulaProvider } from '../../../providers/FormulaProvider'
+import DialogDeleteFormula from './delete-formula'
 
 type Props = {}
 
@@ -35,7 +35,7 @@ function Index({}: Props) {
             <div className="flex flex-col">
               <h1>Daftar Formula</h1>
               <p className="text-xs text-stone-800/65">
-                Formula perhitungan untuk report sistem.
+                Formula perhitungan yang digunakan untuk menghasilkan laporan sistem secara akurat.
               </p>
             </div>
             <SheetTrigger asChild>
@@ -49,7 +49,8 @@ function Index({}: Props) {
               </Button>
             </SheetTrigger>
           </div>
-          <TableFormula />
+          <TableFormula setOpenForm={setOpenForm} />
+          <DialogDeleteFormula/>
         </div>
       </Sheet>
     </FormulaProvider>

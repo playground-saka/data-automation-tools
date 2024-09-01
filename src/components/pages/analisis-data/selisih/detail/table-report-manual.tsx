@@ -42,7 +42,7 @@ function TableReportManual({date,id}: Props) {
       header: () => {
         return (
           <div className="flex flex-row gap-1 items-center text-xs">
-            DateTime
+            Tanggal
           </div>
         );
       },
@@ -355,7 +355,7 @@ function TableReportManual({date,id}: Props) {
             }
             disabled={!data?.per_page || data?.current_page === 1}
           >
-            Previous
+            Sebelumnya
           </Button>
           <Button
             variant="outline"
@@ -365,7 +365,7 @@ function TableReportManual({date,id}: Props) {
             }
             disabled={!data?.next_page}
           >
-            Next
+            Selanjutnya
           </Button>
         </div>
       </div>

@@ -3,7 +3,7 @@ declare namespace Model {
     interface CategoryData {
       id: number
       namaKategori: string,
-      status: boolean,
+      statusKategori: boolean,
       createdAt: DateTime,
       updatedAt: DateTime
     }

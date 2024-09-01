@@ -13,8 +13,8 @@ import { PlusIcon } from '@heroicons/react/24/outline'
 
 import FormPelanggan from './form-pelanggan'
 import TablePelanggan from './table-pelanggan'
-import { getCustomers } from "@/app/api/customer";
 import { PelangganProvider } from '../../../providers/PelangganProvider'
+import DialogDeletePelanggan from './delete-pelanggan'
 
 
 type Props = {}
@@ -35,7 +35,7 @@ function Index({}: Props) {
           <div className="flex flex-row items-center justify-between">
             <div className="flex flex-col">
               <h1>Daftar Pelanggan</h1>
-              <p className="text-xs text-stone-800/65">Ini adalah daftar pelanggan PLTM, PLTMH, dan PLTMS</p>
+              <p className="text-xs text-stone-800/65">Kelola dan cari daftar pelanggan yang tersedia dengan mudah.</p>
             </div>
             <SheetTrigger asChild>
               <Button onClick={() => setOpenForm(true)} className="flex flex-row gap-2 items-center">
@@ -44,7 +44,8 @@ function Index({}: Props) {
               </Button>
             </SheetTrigger>
           </div>
-          <TablePelanggan/>
+          <TablePelanggan setOpenForm={setOpenForm}/>
+          <DialogDeletePelanggan/>
         </div>
       </Sheet>
     </PelangganProvider>

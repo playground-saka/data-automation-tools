@@ -12,10 +12,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getAllCustomers } from "@/app/api/customer";
-import { postFormula } from "@/app/api/formula";
+import { postFormula, putFormula } from "@/app/api/formula";
 import { FormulaContext } from "../../../providers/FormulaProvider";
 import { toast } from "@/components/ui/use-toast";
-import { SheetClose, SheetFooter } from "@/components/ui/sheet";
+import { SheetFooter } from "@/components/ui/sheet";
 import { schemaFormFormula } from "@/schemas/formula-schemas";
 import { TypeOf } from "zod";
 import { Formik,Form, ErrorMessage } from "formik";
@@ -26,7 +26,8 @@ type Props = {
 };
 
 function FormFormula({ setOpenForm }: Props) {
-  const { triggerFetchData } = useContext(FormulaContext);
+  const { triggerFetchData,formula,setFormula } = useContext(FormulaContext);
+  const [loading, setLoading] = useState(false);
   type FormulaFormInputs = TypeOf<typeof schemaFormFormula>;
   const [allCustomers,setAllCustomer] = useState<Model.Customer.CustomerAllData[]>([])
 
@@ -44,13 +45,15 @@ function FormFormula({ setOpenForm }: Props) {
   return (
     <Formik<FormulaFormInputs>
       initialValues={{
-        pelangganId: "",
-        faktorArus: "",
-        faktorTegangan: "",
-        faktorPower: "",
+        pelangganId: formula ? (formula.pelanggan.id).toString() : "",
+        faktorArus: formula ? formula.faktorArus : "",
+        faktorTegangan: formula ? formula.faktorTegangan : "",
+        faktorPower: formula ? formula.faktorPower : "",
       }}
       onSubmit={async (values) => {
-        await postFormula(values)
+        setLoading(true);
+        if(!formula) {
+          await postFormula(values)
           .then((res) => {
             setOpenForm(false);
             triggerFetchData();
@@ -65,7 +68,28 @@ function FormFormula({ setOpenForm }: Props) {
               description: err.response.data.error,
             });
           })
-          .finally(() => {});
+          .finally(() => {
+            setLoading(false);
+          });
+        }else{
+          await putFormula(formula.id,values)
+          .then((res) => {
+            setOpenForm(false);
+            triggerFetchData();
+            toast({
+              title: "Success",
+              description: "Data Berhasil disimpan",
+            });
+          })
+          .catch((err) => {
+            toast({
+              title: "Error",
+              description: err.response.data.message,
+            });
+          }).finally(()=>{
+            setLoading(false);
+          })
+        }
       }}
       validateOnChange={true}
       validationSchema={toFormikValidationSchema(schemaFormFormula)}
@@ -80,6 +104,7 @@ function FormFormula({ setOpenForm }: Props) {
               <Select
                 name="pelangganId"
                 onValueChange={(value) => setFieldValue("pelangganId", value)}
+                value={values.pelangganId}
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Pilih Pelanggan" />
@@ -170,13 +195,14 @@ function FormFormula({ setOpenForm }: Props) {
           </div>
           <SheetFooter>
             <div className="flex flex-row gap-2 justify-end">
-              <Button type="button" onClick={() => setOpenForm(false)}>
-                Cancel
+              <Button type="button" disabled={loading} isLoading={loading} onClick={() => {setOpenForm(false);setFormula(null)}}>
+                Batal
               </Button>
               <Button
                 type="submit"
                 className="bg-gradient-to-r from-blue-700 to-fuchsia-500"
-                disabled={!isValid}
+                isLoading={loading}
+                disabled={!isValid || loading}
               >
                 Submit
               </Button>

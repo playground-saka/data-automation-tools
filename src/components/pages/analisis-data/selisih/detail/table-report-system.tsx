@@ -19,7 +19,7 @@ const columns: ColumnDef<Model.ReportSystem.ReportSystemData>[] = [
     accessorKey: "dateTime",
     header: () => {
       return (
-        <div className="flex flex-row gap-1 items-center text-xs">DateTime</div>
+        <div className="flex flex-row gap-1 items-center text-xs">Tanggal</div>
       );
     },
     cell: ({ row }) => (
@@ -281,7 +281,7 @@ function TableReportSystem({id,date}: Props) {
             }
             disabled={!data?.per_page || data?.current_page === 1}
           >
-            Previous
+            Sebelumnya
           </Button>
           <Button
             variant="outline"
@@ -291,7 +291,7 @@ function TableReportSystem({id,date}: Props) {
             }
             disabled={!data?.next_page}
           >
-            Next
+            Selanjutnya
           </Button>
         </div>
       </div>

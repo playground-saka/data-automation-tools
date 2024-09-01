@@ -100,7 +100,7 @@ function TableReportDifferent({ id, date }: Props) {
           <TableHeader>
             <TableRow>
               <TableHead rowSpan={3} className="text-center">
-                DateTime
+                Tanggal
               </TableHead>
               <TableHead colSpan={3} className="text-center">
                 Power P
@@ -132,37 +132,55 @@ function TableReportDifferent({ id, date }: Props) {
                     {formatDateTime(row.dateTime, "d-m-Y H:i:s")}
                   </TableCell>
                   <TableCell className="text-center">
-                    {row.totalPowerPDifference}
+                    {row.whExportHourly}
                   </TableCell>
                   <TableCell className="text-center">
-                    {row.logsheetManual.totalPowerP}
+                    {row.totalPowerPManual}
                   </TableCell>
                   <TableCell className="text-center">
-                    {(
-                      row.totalPowerPDifference - row.logsheetManual.totalPowerP
-                    ).toFixed(2)}
+                    {row.selisihPowerP < 0 ? (
+                      <span className="text-red-500">
+                        {row.selisihPowerP}
+                      </span>
+                    ) : (
+                      <span className="text-green-400">
+                        {row.selisihPowerP}
+                      </span>
+                    )}
                   </TableCell>
                   <TableCell className="text-center">
-                    {row.currentRDifference}
+                    {row.currentRHourly}
                   </TableCell>
                   <TableCell className="text-center">
-                    {row.logsheetManual.currentR}
+                    {row.currentRManual}
                   </TableCell>
                   <TableCell className="text-center">
-                    {(
-                      row.currentRDifference - row.logsheetManual.currentR
-                    ).toFixed(2)}
+                    {row.selisihCurrentR < 0 ? (
+                      <span className="text-red-500">
+                        {row.selisihCurrentR}
+                      </span>
+                    ) : (
+                      <span className="text-green-400">
+                        {row.selisihCurrentR}
+                      </span>
+                    )}
                   </TableCell>
                   <TableCell className="text-center">
-                    {row.voltageRDifference}
+                    {row.voltageRHourly}
                   </TableCell>
                   <TableCell className="text-center">
-                    {row.logsheetManual.voltageRS}
+                    {row.voltageRSManual}
                   </TableCell>
                   <TableCell className="text-center">
-                    {(
-                      row.voltageRDifference - row.logsheetManual.voltageRS
-                    ).toFixed(2)}
+                    {row.selisihVoltageRS < 0 ? (
+                      <span className="text-red-500">
+                        {row.selisihVoltageRS}
+                      </span>
+                    ) : (
+                      <span className="text-green-400">
+                        {row.selisihVoltageRS}
+                      </span>
+                    )}
                   </TableCell>
                 </TableRow>
               )
@@ -181,7 +199,7 @@ function TableReportDifferent({ id, date }: Props) {
             }
             disabled={!data?.per_page || data?.current_page === 1}
           >
-            Previous
+            Sebelumnya
           </Button>
           <Button
             variant="outline"
@@ -191,7 +209,7 @@ function TableReportDifferent({ id, date }: Props) {
             }
             disabled={!data?.next_page}
           >
-            Next
+            Selanjutnya
           </Button>
         </div>
       </div>

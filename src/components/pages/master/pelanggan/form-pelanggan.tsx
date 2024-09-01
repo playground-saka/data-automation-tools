@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { postCustomer } from '@/app/api/customer';
+import { postCustomer, putCustomer } from '@/app/api/customer';
 import { PelangganContext } from '../../../providers/PelangganProvider';
 import { SheetFooter } from '@/components/ui/sheet';
 import { schemaFormCustomer } from '@/schemas/customer-schemas';
@@ -26,7 +26,7 @@ type Props = {
 }
 
 function FormPelanggan({setOpenForm}: Props) {
-  const { triggerFetchData } = useContext(PelangganContext);
+  const { triggerFetchData, setPelanggan,pelanggan } = useContext(PelangganContext);
   type CustomerFormInputs = TypeOf<typeof schemaFormCustomer>;
   const [categories, setCategory] = useState<Model.Category.CategoryData[]>([]);
   const fetchDataCategory = async () =>
@@ -39,13 +39,31 @@ function FormPelanggan({setOpenForm}: Props) {
   return (
     <Formik<CustomerFormInputs>
       initialValues={{
-        pelangganId: "",
-        namaPelanggan: "",
-        kategoriId: "",
+        pelangganId: pelanggan?.pelangganId ? pelanggan?.pelangganId.toString() : "",
+        namaPelanggan: pelanggan?.namaPelanggan ? pelanggan?.namaPelanggan : "",
+        kategoriId: pelanggan?.kategori ? (pelanggan.kategori.id).toString() : "",
         statusPelanggan: true,
       }}
       onSubmit={async (values) => {
-        await postCustomer(values)
+        if (!pelanggan) {
+          await postCustomer(values)
+            .then((res) => {
+              setOpenForm(false);
+              triggerFetchData();
+              toast({
+                title: "Success",
+                description: "Data berhasil disimpan",
+              });
+            })
+            .catch((err) => {
+              toast({
+                title: "Error",
+                description: err.response.data.error,
+              });
+            })
+            .finally(() => {});
+        } else {
+          await putCustomer(pelanggan.id,values)
           .then((res) => {
             setOpenForm(false);
             triggerFetchData();
@@ -53,14 +71,14 @@ function FormPelanggan({setOpenForm}: Props) {
               title: "Success",
               description: "Data berhasil disimpan",
             });
-          })
-          .catch((err) => {
+          }).catch((err) => {
             toast({
               title: "Error",
               description: err.response.data.error,
             });
           })
           .finally(() => {});
+        }
       }}
       validateOnChange={true}
       validateOnBlur={true}
@@ -115,9 +133,8 @@ function FormPelanggan({setOpenForm}: Props) {
               </Label>
               <Select
                 name="kategoriId"
-                onValueChange={(value) =>
-                  setFieldValue("kategoriId", value)
-                }
+                onValueChange={(value) => setFieldValue("kategoriId", value)}
+                value={values.kategoriId}
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Pilih Kategori" />
@@ -146,7 +163,9 @@ function FormPelanggan({setOpenForm}: Props) {
           </div>
           <SheetFooter>
             <div className="flex flex-row gap-2 justify-end">
-              <Button type='button' onClick={() => setOpenForm(false)}>Cancel</Button>
+              <Button type="button" onClick={() => {setOpenForm(false);setPelanggan(null)}}>
+                Batal
+              </Button>
               <Button
                 type="submit"
                 className="bg-gradient-to-r from-blue-700 to-fuchsia-500"

@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from 
 import FormKategori from "./form-kategori";
 import TableKategori from "./table-kategori";
 import { KategoriProvider } from "../../../providers/KategoriProvider";
+import DialogDeleteKategori from "./delete-kategori";
 
 type Props = {};
 
@@ -25,9 +26,9 @@ function Index({}: Props) {
           </SheetContent>
           <div className="flex flex-row items-center justify-between">
             <div className="flex flex-col">
-              <h1>Daftar Kategori</h1>
+              <h1>Daftar Kategori Pelanggan</h1>
               <p className="text-xs text-stone-800/65">
-                Ini adalah daftar kategori pelanggan
+                Kelola dan cari kategori pelanggan yang tersedia dengan mudah.
               </p>
             </div>
             <SheetTrigger asChild>
@@ -41,7 +42,8 @@ function Index({}: Props) {
               </Button>
             </SheetTrigger>
           </div>
-          <TableKategori />
+          <TableKategori setOpenForm={setOpenForm}/>
+          <DialogDeleteKategori/>
         </div>
       </Sheet>
     </KategoriProvider>

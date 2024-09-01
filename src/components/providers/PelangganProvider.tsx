@@ -8,6 +8,8 @@ export const PelangganProvider = ({
   children: React.ReactNode;
 }) => {
   const [triggerFetch, setTriggerFetch] = useState(false);
+  const [pelanggan, setPelanggan] = useState<Model.Customer.CustomerData | null>(null);
+  const [openDialogDelete, setOpenDialogDelete] = useState(false);
 
   const triggerFetchData = useCallback(() => {
     setTriggerFetch((prev) => !prev);
@@ -15,7 +17,7 @@ export const PelangganProvider = ({
 
   return (
     <PelangganContext.Provider
-      value={{ triggerFetchData, triggerFetch }}
+      value={{ triggerFetchData, triggerFetch, setPelanggan, pelanggan,setOpenDialogDelete, openDialogDelete }}
     >
       {children}
     </PelangganContext.Provider>

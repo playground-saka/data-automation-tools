@@ -1,4 +1,4 @@
-import React, { HTMLAttributes, HtmlHTMLAttributes, useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 
 import {
   ColumnDef,
@@ -8,7 +8,6 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
@@ -31,115 +30,14 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { LogSheetontext } from '../../../providers/LogSheetProvider'
-import { getLogsheet, postLogsheetManual, postLogsheetSistem } from '@/app/api/logsheet'
+import { getLogsheet } from '@/app/api/logsheet'
 import { formatDateTime } from '@/utils/formatter'
-import { ToastAction } from '@radix-ui/react-toast'
-import { toast } from '@/components/ui/use-toast'
-import * as XLSX from 'xlsx';
+import { useRouter } from 'next/navigation'
 
 type Props = {}
 
 function TableLogsheet({}: Props) {
-  const onChangeFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault()
-    let id = e.currentTarget.id
-    let selectedFile: File | null = null
-    if (e.currentTarget && e.currentTarget.files && e.currentTarget.files.length > 0) selectedFile = e.currentTarget.files[0];
-    let allowFileTypes = [ "text/csv", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
-    if (selectedFile) {
-      if (!allowFileTypes.includes(selectedFile.type)) {
-        toast({
-          title: "Error",
-          description: "File type not allowed",
-          action: <ToastAction altText="Dismiss">Dismiss</ToastAction>,
-        });
-      } else {
-        let typeImport = e.currentTarget.id.split("_")[2];
-        let pelangganId = e.currentTarget.id.split("_")[1];
-        let reader = new FileReader();
-        reader.readAsArrayBuffer(selectedFile);
-        reader.onload = async(e) => {
-          const bstr = e.target?.result;
-          const wb = XLSX.read(bstr, { type: "binary" });
-          const wsname = wb.SheetNames[0];
-          const ws = wb.Sheets[wsname];
-          const dataExcel:any[] = XLSX.utils.sheet_to_json(ws, {
-            header: 1,
-          });
-
-          // Temukan baris pertama yang memiliki data
-          let firstDataRowIndex = 0;
-          for (let i = 0; i < dataExcel.length; i++) {
-            if (dataExcel[i].some( (cell: any) => cell !== undefined && cell !== null && cell !== "")) {
-              firstDataRowIndex = i;
-              break;
-            }
-          }
-          const jsonData: any[] = dataExcel.splice(firstDataRowIndex, 4);
-          
-          let formData = new FormData();
-          formData.append("file", selectedFile);
-          formData.append("pelangganId", pelangganId);
-          let input = document.getElementById(id) as HTMLInputElement | null;
-
-          if (typeImport == "manual") {
-            if (jsonData.length !== 4 && jsonData[3].length !== 12) {
-              toast({
-                title: "Gagal",
-                description: "Terdapat data yang tidak sesuai"
-              });
-            }else{
-              await postLogsheetManual(formData)
-              .then((res) => {
-                toast({
-                  title: "Sukses",
-                  description: "File berhasil diupload",
-                });
-                fetchData();
-              }).catch((err) => {
-                if (input) input.value = "";
-                toast({
-                  title: "Gagal",
-                  description: err.response.data.message
-                });
-              })
-            }
-          } else {
-            if (jsonData.length !== 4 && jsonData[3].length !== 14) {
-               toast({
-                title: "Gagal",
-                description: "Terdapat data yang tidak sesuai"
-              });
-            }else{
-              await postLogsheetSistem(formData)
-              .then((res) => {
-                toast({
-                  title: "Sukses",
-                  description: "File berhasil diupload"
-                });
-                fetchData();
-              })
-              .catch((err)=>{
-                if (input) input.value = "";
-                toast({
-                  title: "Gagal",
-                  description: err.response.data.message
-                });
-              })
-            }
-          }
-        };
-      }
-  
-    }else{
-      toast({
-        title: "Error",
-        description: "File not found",
-        action: <ToastAction altText="Dismiss">Dismiss</ToastAction>,
-      });
-    }
-  
-  }
+  const router = useRouter()
   const columns: ColumnDef<Model.LogSheet.LogSheetData>[] = [
     {
       accessorKey: "date",
@@ -176,7 +74,6 @@ function TableLogsheet({}: Props) {
       },
       cell: ({ row }: any) => {
         const name = row.getValue("namaPelanggan");
-
         return <div className="text-xs">{name}</div>;
       },
       enableSorting: true,
@@ -207,22 +104,17 @@ function TableLogsheet({}: Props) {
       `}
         >
           {row.getValue("logsheetManual") ? (
-            <p className="capitalize text-xs text-center">Uploaded</p>
+            <p className=" text-xs text-center">Selesai di Upload</p>
           ) : (
-            <div className="cursor-pointer">
-              <input
-                id={`${row.original.id}_${row.original.pelanggan.id}_manual`}
-                type="file"
-                className="hidden"
-                name={`${row.original.id}_${row.original.pelanggan.id}_manual`}
-                onChange={onChangeFile}
-              />
-              <label
-                htmlFor={`${row.original.id}_${row.original.pelanggan.id}_manual`}
-                className="text-xs cursor-pointer"
-              >
-                Belum di Upload
-              </label>
+            <div
+              className="cursor-pointer text-xs"
+              onClick={() =>
+                router.push(
+                  `/master/logsheet/upload/${row.original.pelanggan.id}/manual`
+                )
+              }
+            >
+              Belum di Upload
             </div>
           )}
         </div>
@@ -253,22 +145,14 @@ function TableLogsheet({}: Props) {
       `}
         >
           {row.getValue("logsheetSistem") ? (
-            <p className="capitalize text-xs text-center">Uploaded</p>
+            <p className="text-xs text-center">Selesai di Upload</p>
           ) : (
-            <div className="cursor-pointer">
-              <input
-                id={`${row.original.id}_${row.original.pelanggan.id}_sistem`}
-                type="file"
-                className="hidden"
-                name={`${row.original.id}_${row.original.pelanggan.id}_sistem`}
-                onChange={onChangeFile}
-              />
-              <label
-                htmlFor={`${row.original.id}_${row.original.pelanggan.id}_sistem`}
-                className="text-xs cursor-pointer"
-              >
-                Belum di Upload
-              </label>
+            <div className={`cursor-pointer text-xs ${!row.original.logsheetManual && 'cursor-not-allowed'}`} title={!row.original.logsheetManual ? 'File Manual Belum di Upload' : ''} onClick={row.original.logsheetManual ? () =>
+                router.push(
+                  `/master/logsheet/upload/${row.original.pelanggan.id}/sistem`
+                )
+              : ()=>{}}>
+              Belum di Upload
             </div>
           )}
         </div>
@@ -341,14 +225,14 @@ useEffect(() => {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button type='button' variant="outline" className="ml-auto">
-              Columns <ChevronDown className="ml-2 h-4 w-4" />
+              Filter Kolom <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {table
               .getAllColumns()
               .filter((column) => column.getCanHide())
-              .map((column) => {
+              .map((column:any) => {
                 return (
                   <DropdownMenuCheckboxItem
                     key={column.id}
@@ -423,7 +307,7 @@ useEffect(() => {
             onClick={() => setCurrentPage(data?.prev_page ? data?.prev_page : 1)}
             disabled={!data?.per_page || data?.current_page === 1}
           >
-            Previous
+            Sebelumnya
           </Button>
           <Button
             variant="outline"
@@ -431,7 +315,7 @@ useEffect(() => {
             onClick={() => setCurrentPage(data?.next_page ? data?.next_page : 1)}
             disabled={!data?.next_page}
           >
-            Next
+            Selanjutnya
           </Button>
         </div>
       </div>

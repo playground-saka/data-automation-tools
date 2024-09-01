@@ -12,7 +12,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown } from "lucide-react"
+import { ArrowUpDown, ChevronDown, Trash2Icon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -33,8 +33,11 @@ import {
 import { getFormulas } from '@/app/api/formula'
 import { FormulaContext } from '../../../providers/FormulaProvider'
 import { toast } from '@/components/ui/use-toast'
+import { PencilIcon } from '@heroicons/react/24/outline'
 
-type Props = {}
+type Props = {
+  setOpenForm: React.Dispatch<React.SetStateAction<boolean>>
+}
 
 type Formula = {
   id: number
@@ -43,97 +46,124 @@ type Formula = {
   formula: string
 }
 
-export const columns: ColumnDef<Model.Formula.FormulaData>[] = [
-  {
-    accessorKey: "namaPelanggan",
-    accessorFn: (row) => row.pelanggan.namaPelanggan,
-    header: ({ column }) => {
-      return (
-        <div
-          className="flex flex-row gap-1 items-center cursor-pointer text-xs"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Nama Pelanggan
-          <ArrowUpDown className="h-3 w-3" />
-        </div>
-      );
-    },
-    cell: ({ row }: any) => {
-      return <div className="text-xs">{row.getValue("namaPelanggan")}</div>;
-    },
-    enableSorting: true,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "faktorArus",
-    header: ({ column }) => {
-      return (
-        <div
-          className="flex flex-row gap-1 items-center cursor-pointer text-xs"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Faktor Arus
-          <ArrowUpDown className="h-3 w-3" />
-        </div>
-      );
-    },
-    cell: ({ row }: any) => {
-      return <div className="text-xs">{row.getValue("faktorArus")}</div>;
-    },
-    enableSorting: true,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "faktorTegangan",
-    header: ({ column }) => {
-      return (
-        <div
-          className="flex flex-row gap-1 items-center cursor-pointer text-xs"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Faktor Tegangan
-          <ArrowUpDown className="h-3 w-3" />
-        </div>
-      );
-    },
-    cell: ({ row }: any) => {
-      return <div className="text-xs">{row.getValue("faktorTegangan")}</div>;
-    },
-    enableSorting: true,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "faktorPower",
-    header: ({ column }) => {
-      return (
-        <div
-          className="flex flex-row gap-1 items-center cursor-pointer text-xs"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Faktor Tegangan
-          <ArrowUpDown className="h-3 w-3" />
-        </div>
-      );
-    },
-    cell: ({ row }: any) => {
-      return <div className="text-xs">{row.getValue("faktorPower")}</div>;
-    },
-    enableSorting: true,
-    enableHiding: false,
-  },
-];
 
-function TableFormula({}: Props) {
+function TableFormula({setOpenForm}: Props) {
+  const { triggerFetch, setFormula,setOpenDialogDelete } = useContext(FormulaContext);
   const [data,setData] = useState<Model.Formula.FormulaData[]>([])
   const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  const columns: ColumnDef<Model.Formula.FormulaData>[] = [
+    {
+      accessorKey: "namaPelanggan",
+      accessorFn: (row) => row.pelanggan.namaPelanggan,
+      header: ({ column }) => {
+        return (
+          <div
+            className="flex flex-row gap-1 items-center cursor-pointer text-xs"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Nama Pelanggan
+            <ArrowUpDown className="h-3 w-3" />
+          </div>
+        );
+      },
+      cell: ({ row }: any) => {
+        return <div className="text-xs">{row.getValue("namaPelanggan")}</div>;
+      },
+      enableSorting: true,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "faktorArus",
+      header: ({ column }) => {
+        return (
+          <div
+            className="flex flex-row gap-1 items-center cursor-pointer text-xs"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Faktor Arus
+            <ArrowUpDown className="h-3 w-3" />
+          </div>
+        );
+      },
+      cell: ({ row }: any) => {
+        return <div className="text-xs">{row.getValue("faktorArus")}</div>;
+      },
+      enableSorting: true,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "faktorTegangan",
+      header: ({ column }) => {
+        return (
+          <div
+            className="flex flex-row gap-1 items-center cursor-pointer text-xs"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Faktor Tegangan
+            <ArrowUpDown className="h-3 w-3" />
+          </div>
+        );
+      },
+      cell: ({ row }: any) => {
+        return <div className="text-xs">{row.getValue("faktorTegangan")}</div>;
+      },
+      enableSorting: true,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "faktorPower",
+      header: ({ column }) => {
+        return (
+          <div
+            className="flex flex-row gap-1 items-center cursor-pointer text-xs"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Faktor Tegangan
+            <ArrowUpDown className="h-3 w-3" />
+          </div>
+        );
+      },
+      cell: ({ row }: any) => {
+        return <div className="text-xs">{row.getValue("faktorPower")}</div>;
+      },
+      enableSorting: true,
+      enableHiding: false,
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }) => {
+        return (
+          <>
+            <div className="flex flex-row">
+              <div
+                onClick={() => {
+                  setFormula(row.original);
+                  setOpenForm(true);
+                }}
+                className="p-2 w-fit flex justify-end cursor-pointer"
+              >
+                <PencilIcon className="w-4 h-4" />
+              </div>
+              <div
+                onClick={() => {
+                  setFormula(row.original);
+                  setOpenDialogDelete(true);
+                }}
+                className="p-2 w-fit flex justify-end cursor-pointer text-red-500"
+              >
+                <Trash2Icon className="w-4 h-4" />
+              </div>
+            </div>
+          </>
+        );
+      },
+    },
+  ];
 
-  const { triggerFetch } = useContext(FormulaContext);
 
   const fetchData = async() => {
     await getFormulas()
@@ -189,7 +219,7 @@ function TableFormula({}: Props) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button type='button' variant="outline" className="ml-auto">
-              Columns <ChevronDown className="ml-2 h-4 w-4" />
+              Filter Kolom <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -272,7 +302,7 @@ function TableFormula({}: Props) {
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            Previous
+            Sebelumnya
           </Button>
           <Button
             type='button'
@@ -281,7 +311,7 @@ function TableFormula({}: Props) {
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            Next
+            Selanjutnya
           </Button>
         </div>
       </div>

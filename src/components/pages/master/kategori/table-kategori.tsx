@@ -12,7 +12,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown } from "lucide-react";
+import { ArrowUpDown, ChevronDown, Trash2Icon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -33,9 +33,13 @@ import {
 import { KategoriContext } from "../../../providers/KategoriProvider";
 import { getCategories } from "@/app/api/category";
 import { toast } from "@/components/ui/use-toast";
+import { PencilIcon } from "@heroicons/react/24/outline";
 
-type Props = {};
-function TableKategori({}: Props) {
+type Props = {
+  setOpenForm: React.Dispatch<React.SetStateAction<boolean>>;
+};
+function TableKategori({ setOpenForm }: Props) {
+  const { triggerFetch, setKategori, setOpenDialogDelete } = useContext(KategoriContext);
   const columns: ColumnDef<Model.Category.CategoryData>[] = [
     {
       id: "namaKategori",
@@ -58,8 +62,9 @@ function TableKategori({}: Props) {
       enableHiding: false,
     },
     {
-      id: "statusKategori",
-      accessorKey: "statusKategori",
+      id: "status",
+      accessorKey: "status",
+      accessorFn: (row) => row.statusKategori,
       header: ({ column }) => {
         return (
           <div
@@ -72,7 +77,7 @@ function TableKategori({}: Props) {
         );
       },
       cell: ({ row }: any) => {
-        const status = row.getValue("statusKategori");
+        const status = row.getValue("status");
         return (
           <div
             className={`
@@ -92,6 +97,36 @@ function TableKategori({}: Props) {
       },
       enableSorting: true,
     },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }) => {
+        return (
+          <>
+            <div className="flex flex-row">
+              <div
+                onClick={() => {
+                  setKategori(row.original);
+                  setOpenForm(true);
+                }}
+                className="p-2 w-fit flex justify-end cursor-pointer"
+              >
+                <PencilIcon className="w-4 h-4" />
+              </div>
+              <div
+                onClick={() => {
+                  setKategori(row.original);
+                  setOpenDialogDelete(true);
+                }}
+                className="p-2 w-fit flex justify-end cursor-pointer text-red-500"
+              >
+                <Trash2Icon className="w-4 h-4" />
+              </div>
+            </div>
+          </>
+        );
+      },
+    },
   ];
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -102,7 +137,6 @@ function TableKategori({}: Props) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-  const { triggerFetch } = useContext(KategoriContext);
 
   const fetchData = async () => {
     setLoading(true);
@@ -113,9 +147,10 @@ function TableKategori({}: Props) {
       .catch((err) => {
         toast({
           title: "Error",
-          description: err.response.data.message
-        })
-      }).finally(() => {
+          description: err.response.data.message,
+        });
+      })
+      .finally(() => {
         setLoading(false);
       });
   };
@@ -148,7 +183,9 @@ function TableKategori({}: Props) {
       <div className="flex items-center py-4">
         <Input
           placeholder="cari berdasarkan nama..."
-          value={(table.getColumn("namaKategori")?.getFilterValue() as string) ?? ""}
+          value={
+            (table.getColumn("namaKategori")?.getFilterValue() as string) ?? ""
+          }
           onChange={(event) =>
             table.getColumn("namaKategori")?.setFilterValue(event.target.value)
           }
@@ -157,7 +194,7 @@ function TableKategori({}: Props) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button type="button" variant="outline" className="ml-auto">
-              Columns <ChevronDown className="ml-2 h-4 w-4" />
+              Kolom Filter <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -240,7 +277,7 @@ function TableKategori({}: Props) {
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            Previous
+            Sebelumnya
           </Button>
           <Button
             type="button"
@@ -249,7 +286,7 @@ function TableKategori({}: Props) {
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            Next
+            Selanjutnya
           </Button>
         </div>
       </div>

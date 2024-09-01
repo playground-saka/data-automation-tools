@@ -17,8 +17,6 @@ export default function Login() {
   const router = useRouter();
   const { toast } = useToast();
 
-  console.log(process.env.NEXT_PUBLIC_BASE_URL);
-  
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -27,14 +25,15 @@ export default function Login() {
     .then((res) => {
       dispatch(setLogin(res));
       router.push("/dashboard");
+      setLoading(false);
     })
     .catch((err) => {
       toast({
         title: "Unauthorized",
         description: err.response.data.message,
       });
-    })
-    .finally(() => setLoading(false));
+      setLoading(false);
+    });
   };
   return (
     <>
@@ -65,16 +64,16 @@ export default function Login() {
             type="password"
             id="password"
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
+            placeholder="Kata Sandi"
           />
         </div>
         <div className="intro-x mt-5 text-center xl:mt-8 xl:text-left">
           <Button
             type="submit"
             disabled={loading}
+            isLoading={loading}
             className="w-full xl:w-32 xl:mr-3"
           >
-            {loading ?? "Loading..."}
             Masuk
           </Button>
         </div>

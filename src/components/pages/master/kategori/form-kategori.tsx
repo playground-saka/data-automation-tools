@@ -1,13 +1,12 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getCategories, postCategory } from "@/app/api/category";
+import {  postCategory, putCategory } from "@/app/api/category";
 import { SheetFooter } from "@/components/ui/sheet";
 import { KategoriContext } from "../../../providers/KategoriProvider";
-import { validateFormData } from "@/utils/validation.ts";
-import { z,TypeOf } from "zod";
+import { TypeOf } from "zod";
 import { Formik,ErrorMessage, Form } from 'formik';
 import { schemaFormcategory } from "@/schemas/category-schemas";
 import { toFormikValidationSchema } from "zod-formik-adapter";
@@ -17,13 +16,19 @@ type Props = {
   setOpenForm: React.Dispatch<React.SetStateAction<boolean>>
 };
 function FormKategori({setOpenForm}: Props) {
-  const { triggerFetchData } = useContext(KategoriContext);
+  const { triggerFetchData,kategori,setKategori } = useContext(KategoriContext);
+  const [loading, setLoading] = useState(false);
   type CategoryFormInputs = TypeOf<typeof schemaFormcategory>;
   return (
     <Formik<CategoryFormInputs>
-      initialValues={{ namaKategori: "", statusKategori: true }}
+      initialValues={{ 
+        namaKategori: kategori ? kategori?.namaKategori : "",
+        statusKategori: true 
+      }}
       onSubmit={async (values) => {
-        await postCategory(values)
+        setLoading(true);
+        if(!kategori){
+          await postCategory(values)
           .then((res) => {
             setOpenForm(false);
             triggerFetchData();
@@ -31,18 +36,40 @@ function FormKategori({setOpenForm}: Props) {
               title: "Sukses",
               description: "Kategori berhasil ditambahkan",
               duration: 3000,
-            })
+            });
           })
           .catch((err) => {
             toast({
               title: "Gagal",
               description: err.response.data.message,
               duration: 3000,
-            })
+            });
           })
           .finally(() => {
-
+            setLoading(false);
           });
+        }else{
+          await putCategory(kategori.id,values)
+          .then((res) => {
+            setOpenForm(false);
+            setKategori(null)
+            triggerFetchData();
+            toast({
+              title: "Sukses",
+              description: "Kategori berhasil diubah",
+              duration: 3000,
+            });
+          })
+          .catch((err) => {
+            toast({
+              title: "Gagal",
+              description: err.respons.data.message,
+              duration: 3000,
+            });
+          }).finally(()=>{
+            setLoading(false);
+          })
+        }
       }}
       validateOnChange={true}
       validationSchema={toFormikValidationSchema(schemaFormcategory)}
@@ -58,6 +85,7 @@ function FormKategori({setOpenForm}: Props) {
                 id="namaKategori"
                 type="text"
                 name="name"
+                value={values.namaKategori}
                 onChange={(e) => setFieldValue("namaKategori", e.target.value)}
                 className="col-span-3"
               />
@@ -72,13 +100,17 @@ function FormKategori({setOpenForm}: Props) {
           </div>
           <SheetFooter>
             <div className="flex flex-row gap-2 justify-end">
-              <Button type="button" onClick={() => setOpenForm(false)}>
-                Cancel
+              <Button type="button" disabled={loading} isLoading={loading} onClick={() => {
+                setOpenForm(false)
+                setKategori(null)
+              }}>
+                Batal
               </Button>
               <Button
                 type="submit"
                 className="bg-gradient-to-r from-blue-700 to-fuchsia-500"
-                disabled={!isValid}
+                disabled={!isValid || loading}
+                isLoading={loading}
               >
                 Simpan
               </Button>

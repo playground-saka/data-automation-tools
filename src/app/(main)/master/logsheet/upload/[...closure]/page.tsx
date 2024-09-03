@@ -22,7 +22,7 @@ function Page () {
         router.push("/master/logsheet");
       }
     }
-  }, [params]);
+  }, [params, router]);
   
   return (
     <section className="w-full h-full flex flex-col gap-6 px-6 py-6 pt-12 pb-20">

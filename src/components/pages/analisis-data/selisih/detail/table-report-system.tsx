@@ -179,23 +179,21 @@ function TableReportSystem({id,date}: Props) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
-  const fetchData = async () => {
-    setLoading(true);
-    await getReportSystem(currentPage, perPage,id,date)
-      .then((res) => {
+  useEffect(() => {
+    const fetchDataAsync = async () => {
+      setLoading(true);
+      try {
+        const res = await getReportSystem(currentPage, perPage, id, date);
         setData(res);
         setTotalPages(res.total_pages);
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-      .finally(() => {
+      } catch (err) {
+        console.error(err);
+      } finally {
         setLoading(false);
-      });
-  };
-  useEffect(() => {
-    fetchData();
-  }, [currentPage, perPage]);
+      }
+    };
+    fetchDataAsync();
+  }, [currentPage, perPage, id, date]);
 
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});

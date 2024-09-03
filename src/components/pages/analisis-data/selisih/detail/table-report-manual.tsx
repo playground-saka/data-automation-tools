@@ -1,13 +1,5 @@
-import { getLogsheet } from "@/app/api/logsheet";
 import { getReportManual } from "@/app/api/report";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -28,7 +20,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -253,23 +245,21 @@ function TableReportManual({date,id}: Props) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const fetchData = async () => {
-    setLoading(true);
-    await getReportManual(currentPage, perPage,id,date)
-      .then((res) => {
+  useEffect(() => {
+    const fetchDataAsync = async () => {
+      setLoading(true);
+      try {
+        const res = await getReportManual(currentPage, perPage, id, date);
         setData(res);
         setTotalPages(res.total_pages);
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-      .finally(() => {
+      } catch (err) {
+        console.error(err);
+      } finally {
         setLoading(false);
-      });
-  };
-  useEffect(() => {
-    fetchData();
-  }, [currentPage, perPage]);
+      }
+    };
+    fetchDataAsync();
+  }, [currentPage, perPage, id, date]);
 
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});

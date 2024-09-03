@@ -4,6 +4,7 @@ import React, { PropsWithChildren } from "react";
 import ReduxProvider from "@/components/providers/ReduxProvider";
 import { Inter } from "next/font/google";
 import "../globals.css";
+import Image from "next/image";
 const inter = Inter({ subsets: ["latin"] });
 
 export default function AuthLayout({ children }: PropsWithChildren) {
@@ -21,11 +22,14 @@ export default function AuthLayout({ children }: PropsWithChildren) {
                   </span>
                 </a>
                 <div className="my-auto">
-                  <img
+                  <Image 
+                    src="/images/illustration.svg" 
                     className="-intro-x -mt-16 w-1/2"
-                    src="/images/illustration.svg"
-                    alt=""
+                    alt="image-ilustration" 
+                    width={500} 
+                    height={500}
                   />
+
                   <div className="-intro-x mt-10 text-4xl font-medium leading-tight text-white">
                     Lorem ipsum dolor <br />
                     sign in to your account.

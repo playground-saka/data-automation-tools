@@ -8,7 +8,6 @@ import "../globals.css";
 import Sidebar from "@/components/shared/sidebar";
 import ReduxProvider from "@/components/providers/ReduxProvider";
 import { Toaster } from "@/components/ui/toaster";
-import { Html } from "next/document";
 
 const inter = Inter({ subsets: ["latin"] });
 

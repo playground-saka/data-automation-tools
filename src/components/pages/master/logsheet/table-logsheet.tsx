@@ -167,7 +167,7 @@ function TableLogsheet({}: Props) {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = React.useCallback(async () => {
     setLoading(true);
     await getLogsheet(currentPage, perPage)
     .then((res) => {
@@ -179,10 +179,11 @@ function TableLogsheet({}: Props) {
     }).finally(() => {
       setLoading(false);
     });
-  };
-useEffect(() => {
-  fetchData();
-}, [triggerFetch, currentPage, perPage]);
+  }, [currentPage, perPage]);
+  
+  useEffect(() => {
+    fetchData();
+  }, [triggerFetch, fetchData]);
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []

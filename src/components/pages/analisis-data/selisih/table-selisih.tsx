@@ -187,23 +187,30 @@ function TableSelisih({}: Props) {
       rowSelection,
     },
   });
-  const fetchData = async () => {
-    setLoading(true);
-    await getLogsheet(currentPage, perPage)
-      .then((res) => {
-        setData(res);
-        setTotalPages(res.total_pages);
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }
+
   useEffect(() => {
-    fetchData() 
-  }, [])
+    let isMounted = true
+    const fetchDataAsync = async () => {
+      setLoading(true);
+      try {
+        const res = await getLogsheet(currentPage, perPage)
+        if (isMounted) {
+          setData(res);
+          setTotalPages(res.total_pages);
+        }
+      } catch (err) {
+        console.log(err);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+    fetchDataAsync()
+    return () => {
+      isMounted = false
+    }
+  }, [currentPage, perPage])
 
   const exportDifferentData = async (id:number,namaPelanggan:string,date:string):Promise<void> => {
     await exportDifferentLogsheet(id, date)

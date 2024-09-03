@@ -1,8 +1,7 @@
 import axios from "axios";
 import { store } from "@/store/store";
-import { useRouter } from "next/navigation";
 import { setLogout } from "@/store/slices/authSlice";
-import { Router } from "next/router";
+import { useRouter } from "next/router";
 
 const axiosInstance = axios.create({
   baseURL:
@@ -16,11 +15,11 @@ axiosInstance.interceptors.request.use(
   (config) => {
     const state = store.getState();
     const token = state.auth.token;
-    // Jika ada token, tambahkan ke header
+    // If there's a token, add it to the header
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    if (typeof config.headers["Content-Type"] === "undefined"){
+    if (typeof config.headers["Content-Type"] === "undefined") {
       config.headers["Content-Type"] = "application/json";
       config.headers["Accept"] = "application/json";
     }
@@ -35,14 +34,20 @@ axiosInstance.interceptors.response.use(
   (response) => {
     return response;
   },
-  (error) => {
+  async (error) => {
     const { status, data } = error.response || {};
     if (status === 400 && data.error === "Invalid token") {
       store.dispatch(setLogout());
-      Router.push("/login");
+      
+      // Handle navigation in a React component or custom function
+      if (typeof window !== "undefined") {
+        const { push } = (await import("next/router")).useRouter();
+        push("/login");
+      }
     }
     return Promise.reject(error);
   }
 );
+
 
 export default axiosInstance;

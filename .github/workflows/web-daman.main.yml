@@ -86,8 +86,5 @@ jobs:
           docker system prune -f
           docker run --name daman-web -dit \
             -p 9135:9135 \
-            -e DATABASE_URL=${{ secrets.DATABASE_URL }} \
-            -e DIRECT_URL=${{ secrets.DIRECT_URL }} \
-            -e NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }} \
-            -e NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }} \
+            -e NEXT_PUBLIC_BASE_URL=${{ secrets.NEXT_PUBLIC_BASE_URL }} \
             ${{ secrets.DOCKERHUB_USERNAME }}/daman-web:latest

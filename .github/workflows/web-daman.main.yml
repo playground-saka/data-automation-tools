@@ -3,7 +3,7 @@ name: WEB - Data Automation Tools
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   lint:

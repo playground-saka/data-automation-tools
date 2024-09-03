@@ -13,6 +13,9 @@ RUN npm install
 # Copy all source code to the working directory
 COPY . .
 
+# Build the application (add this step if you have a build command)
+RUN npm run build
+
 # Check syntax and code style using ESLint
 RUN npm run lint
 
@@ -24,3 +27,4 @@ EXPOSE 9135
 
 # Run the application
 CMD ["npm", "start"]
+

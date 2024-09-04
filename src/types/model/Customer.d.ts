@@ -2,7 +2,7 @@ declare namespace Model {
   module Customer {
     interface CustomerData {
       id: number;
-      pelangganId:number,
+      pelangganId:string,
       namaPelanggan: string;
       kategori:Model.Category.CategoryData;
       statusPelanggan: boolean;

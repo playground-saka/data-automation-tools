@@ -5,6 +5,11 @@ export async function getLogsheet(page = 1, per_page = 10): Promise<Model.DataTa
   return response.data;
 }
 
+export async function detailLogsheet(id:string): Promise<Model.LogSheet.LogSheetData> {
+  const response = await axiosInstance.get(`/logsheet-status/detail/${id}`);
+  return response.data;
+}
+
 export async function postLogSheetData(payload:any): Promise<Model.DataTable.ResponseDt<Model.LogSheet.LogSheetData[]>> {
   const response = await axiosInstance.post(
     `/logsheet-status`

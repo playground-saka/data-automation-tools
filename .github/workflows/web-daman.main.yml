@@ -76,6 +76,7 @@ jobs:
         password: ${{ secrets.VPS_PASSWORD }}
         port: ${{ secrets.VPS_PORT }}
         script: |
+          echo "Deploying with NEXT_PUBLIC_BASE_URL=${{ secrets.NEXT_PUBLIC_BASE_URL }}"
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/daman-web:latest
 
           if docker ps -a --format '{{.Names}}' | grep -q '^daman-web$'; then

@@ -187,7 +187,7 @@ function TableSelisih({}: Props) {
       rowSelection,
     },
   });
-
+  
   useEffect(() => {
     let isMounted = true
     const fetchDataAsync = async () => {

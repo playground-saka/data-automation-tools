@@ -1,4 +1,4 @@
-import { getReportDifferent } from "@/app/api/report";
+import { getReportDifferent, getReportSystem } from "@/app/api/report";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -20,29 +20,6 @@ type Props = {
   id: number;
   date: string | null;
 };
-const columns = [
-  {
-    columnDef: {
-      header: "Nama",
-      accessor: "nama",
-      meta: {
-        colSpan: 2,
-        rowSpan: 1,
-      },
-    },
-  },
-  {
-    columnDef: {
-      header: "Alamat",
-      accessor: "alamat",
-      meta: {
-        colSpan: 1,
-        rowSpan: 2,
-      },
-    },
-  },
-  // ...
-];
 
 function TableReportDifferent({ id, date }: Props) {
   const [data, setData] =
@@ -71,9 +48,6 @@ function TableReportDifferent({ id, date }: Props) {
     };
     fetchDataAsync();
   }, [currentPage, perPage, id, date]);
-
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState({});
 
   return (
     <div className="w-full">

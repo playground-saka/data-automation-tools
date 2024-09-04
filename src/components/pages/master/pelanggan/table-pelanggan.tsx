@@ -165,19 +165,19 @@ function TablePelanggan({ setOpenForm }: Props) {
     useState<Model.DataTable.ResponseDt<Model.Customer.CustomerData[]>>();
 
   const fetchDataCustomer = React.useCallback(async () => {
-      setLoading(true);
-      await getCustomers(perPage, currentPage)
-        .then((res) => {
-          setData(res);
-        })
-        .catch((err) => {})
-        .finally(() => {
-          setLoading(false);
-        });
-    }, [currentPage, perPage]);
-    useEffect(() => {
-      fetchDataCustomer();
-    }, [fetchDataCustomer, triggerFetch]);
+    setLoading(true);
+    await getCustomers(perPage, currentPage)
+      .then((res) => {
+        setData(res);
+      })
+      .catch((err) => {})
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [currentPage, perPage]);
+  useEffect(() => {
+    fetchDataCustomer();
+  }, [fetchDataCustomer, triggerFetch]);
 
   const table = useReactTable({
     data: data?.data || [],

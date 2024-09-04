@@ -18,23 +18,23 @@ export default function AuthLayout({ children }: PropsWithChildren) {
               <div className="hidden min-h-screen flex-col xl:flex">
                 <a href="" className="-intro-x flex items-center pt-5">
                   <span className="ml-3 text-3xl font-bold text-white">
-                    Daman
+                    Data Automation Tool
                   </span>
                 </a>
                 <div className="my-auto">
-                  <Image 
-                    src="/images/illustration.svg" 
+                  <Image
+                    src="/images/illustration.svg"
                     className="-intro-x -mt-16 w-1/2"
-                    alt="image-ilustration" 
-                    width={500} 
+                    alt="image-ilustration"
+                    width={500}
                     height={500}
                   />
-
-                  <div className="-intro-x mt-10 text-4xl font-medium leading-tight text-white">
-                    Selamat Datang.
+                  <div className="-intro-x mt-10 text-4xl font-medium leading-tight text-white max-w-[450px]">
+                    Selamat Datang di Daman <br />
                   </div>
-                  <div className="-intro-x mt-5 text-lg text-white text-opacity-70 dark:text-slate-400">
-                    Masuk dengan email dan password yang terdaftar.
+                  <div className="-intro-x mt-5 text-lg text-white text-opacity-70 dark:text-slate-400 max-w-[450px]">
+                    Masuk untuk mengidentifikasi dan menganalisis dengan cepat
+                    perbedaan antara file manual dan file yang diimpor sistem.
                   </div>
                 </div>
               </div>

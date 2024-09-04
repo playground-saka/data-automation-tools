@@ -110,7 +110,7 @@ function TableLogsheet({}: Props) {
               className="cursor-pointer text-xs"
               onClick={() =>
                 router.push(
-                  `/master/logsheet/upload/${row.original.pelanggan.id}/manual`
+                  `/master/logsheet/upload/${row.original.id}/manual`
                 )
               }
             >
@@ -184,6 +184,7 @@ function TableLogsheet({}: Props) {
   useEffect(() => {
     fetchData();
   }, [triggerFetch, fetchData]);
+
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []

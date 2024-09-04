@@ -9,18 +9,26 @@ import * as XLSX from "xlsx";
 import { TablePreview } from "./table-preview";
 import { DataTableColumnHeader } from "@/components/data-table-column-header";
 import { postLogsheetManual, postLogsheetSistem } from "@/app/api/logsheet";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { DownloadCloudIcon, DownloadIcon, UploadCloudIcon } from "lucide-react";
+import { formatDateTime } from "@/utils/formatter";
 
 
 type Props = {
-  pelangganId: string;
+  pelangganId: any;
+  date: string;
   type: string;
 };
 
 function FormUpload(params:Props){
+
   const [excelFile, setExcelFileState] = useState<File | null>();
   const [column, setColumn] = useState<ColumnDef<any>[]>([]);
   const [data, setData] = useState<Column<any>[]>([]);
   const router = useRouter();
+  const [titleExcel, setTitleExcel] = useState<string>("");
+  const [namaPelanggan, setNamaPelanggan] = useState<string>("");
+  const [pelangganId, setPelangganId] = useState<string>("");
   const [loading,setLoading] = useState(false);
   const table = useReactTable({
     data,
@@ -42,6 +50,8 @@ function FormUpload(params:Props){
       "text/csv",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     ];
+
+    // VALIDASI FILE TIDAK DITEMUKAN
     if(!fileExcel) {
       toast({
         title: "Error",
@@ -50,7 +60,8 @@ function FormUpload(params:Props){
       });
       return false
     }
-    //ambil nama file tanpa extensionnya
+
+    //VALIDASI NAMA FILE
     const fileName = fileExcel.name.split('.').slice(0, -1).join('.');
     const regex = params.type == 'manual' ? /manual/i : /sistem/i;
     if (!regex.test(fileName)) {
@@ -62,6 +73,7 @@ function FormUpload(params:Props){
       return 0;
     }
 
+    // VALIDASI FILE EXTENSION
     if (!allowFileTypes.includes(fileExcel?.type)){
       toast({
         title: "Error",
@@ -70,7 +82,7 @@ function FormUpload(params:Props){
       });
       return false;
     }
-    setExcelFile(fileExcel);
+
     let reader = new FileReader();
     reader.readAsArrayBuffer(fileExcel);
     reader.onload = (e) => {
@@ -95,7 +107,29 @@ function FormUpload(params:Props){
           break;
         }
       }
+
       const jsonData: any[] = dataExcel.splice(firstDataRowIndex);
+
+      //VALIDASI JIKA DATE TIDAK SESUAI
+      for (let i = 4; i < jsonData.length; i++) {
+        let dateExcel = formatDateTime(jsonData[i][1], "m-Y");
+        
+        if (dateExcel !== params.date) {
+          toast({
+            title: "Error",
+            description: "Tanggal pada file excel tidak sesuai dengan data Logsheet Status",
+          })
+          onCancelUpload()
+          return false;
+        }
+      }
+      
+
+      setTitleExcel(jsonData[0] ?? "");
+      setPelangganId(jsonData[1] ?? "");
+      setNamaPelanggan(jsonData[2] ?? "");
+
+      // VALIDASI COLUMN
       if (
         (jsonData.length !== 4 &&
           jsonData[3].length !== 14 &&
@@ -142,11 +176,17 @@ function FormUpload(params:Props){
         }
       });
       setData(tempData);
+
+      setExcelFile(fileExcel);
     };
   }
 
   const onCancelUpload = () => {
     setExcelFileState(null);
+    const inputElement = document.getElementById("upload") as HTMLInputElement | null;
+    if (inputElement) {
+      inputElement.value = "";
+    }
   }
 
   const onSubmit = async() => {
@@ -191,37 +231,120 @@ function FormUpload(params:Props){
         });
     }
   }
+  const downloadFile = () => {
+    const link = document.createElement("a");
+    if (params.type == "sistem") {
+      link.href = "/excel/LP PLTMH sistem.xlsx";
+      link.download = "LP PLTMH sistem.xlsx";
+    } else {
+      link.href = "/excel/LP PLTMH manual.xlsx";
+      link.download = "LP PLTMH manual.xlsx";
+    }
+    link.click();
+  }
   return (
     <>
       {!excelFile ? (
         <>
-          <label htmlFor="upload">
-            <div className="w-full flex">
-              <div className="w-full flex items-center justify-center shadow-lg rounded-2xl p-5 min-h-[300px] cursor-pointer">
-                <span className="text-2xl">
-                  Select or drop here your file .csv file
-                </span>
-              </div>
-            </div>
-          </label>
-          <input
-            className="hidden"
-            type="file"
-            name="upload"
-            id="upload"
-            onChange={handleUpload}
-            accept="*.csv"
-          />
+          <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-2 mt-3">
+            <Card className="flex flex-col justify-between">
+              <CardHeader>
+                <CardTitle className="items-center justify-center">
+                  <span className="text-lg font-bold rounded-full border px-5 py-3 text-center border-3">
+                    1
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-2">
+                  <h1 className="text-xl font-bold">Unduh Format File</h1>
+                  <span>
+                    Untuk langkah pertama silakan unduh format file excel yang
+                    sudah di sediakan
+                  </span>
+                </div>
+              </CardContent>
+              <CardFooter className="w-full flex items-center justify-center mt-14">
+                <Button onClick={downloadFile} variant="outline" className="">
+                  <DownloadCloudIcon />
+                  &nbsp;Unduh Format File
+                </Button>
+              </CardFooter>
+            </Card>
+            <Card className="flex flex-col justify-between">
+              <CardHeader>
+                <CardTitle className="items-center justify-center">
+                  <span className="text-lg font-bold rounded-full border px-5 py-3 text-center border-3">
+                    2
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-2">
+                  <h1 className="text-xl font-bold">Siapkan Data</h1>
+                  <span>
+                    Lengkapi data yang anda ingin di upload, ke dalam format file
+                    excel yang telah anda download. Lalu simpan file di direktori
+                  </span>
+                </div>
+              </CardContent>
+              <CardFooter className="w-full flex items-center justify-center mt-14">
+                <div className="h-[60px]"></div>
+              </CardFooter>
+            </Card>
+            <Card className="flex flex-col justify-between">
+              <CardHeader>
+                <CardTitle className="items-center justify-center">
+                  <span className="text-lg font-bold rounded-full border px-5 py-3 text-center border-3">
+                    3
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-2">
+                  <h1 className="text-xl font-bold">Upload File</h1>
+                  <span>
+                    Selanjutnya, jika anda sudah yakin dengan data yang anda
+                    isikan sebelumnya dengan format yang sesuai, silakan klik
+                    tombol Pilih File di bawah ini.
+                  </span>
+                </div>
+              </CardContent>
+              <CardFooter className="w-full flex items-center justify-center mt-14">
+                <label htmlFor="upload" onClick={(e) => {
+                  const input = e.currentTarget.nextElementSibling as HTMLInputElement;
+                  input.click();
+                }}>
+                  <Button variant="outline">
+                    <UploadCloudIcon /> &nbsp; Pilih File
+                  </Button>
+                </label>
+                <input
+                  className="hidden"
+                  type="file"
+                  name="upload"
+                  id="upload"
+                  onChange={handleUpload}
+                  accept=".csv,.xlsx,.xls"
+                />
+              </CardFooter>
+            </Card>
+          </div>
         </>
       ) : (
         <>
           <div className="w-full grid gap-3">
             <div className="w-full shadow-lg rounded-2xl p-5 flex flex-col gap-2 bg-[var(--sidebar-bg)]">
-              <div className="w-full flex text-lg font-semibold">
-                <span>Displays the top 10 data from the uploaded file</span>
+              <div className="w-full flex flex-col">
+                <span>{titleExcel}</span>
+                <span>{pelangganId}</span>
+                <span>{namaPelanggan}</span>
               </div>
               <div className="w-full">
                 <TablePreview table={table} totalRows={data.length} />
+                <div className="w-full flex justify-center mt-2">
+                  <span>Menampilkan data 10 baris pertama pada file</span>
+                </div>
               </div>
             </div>
           </div>
@@ -237,7 +360,12 @@ function FormUpload(params:Props){
                 Batal
               </Button>
 
-              <Button type="button" disabled={loading} isLoading={loading} onClick={onSubmit}>
+              <Button
+                type="button"
+                disabled={loading}
+                isLoading={loading}
+                onClick={onSubmit}
+              >
                 Proses
               </Button>
             </div>

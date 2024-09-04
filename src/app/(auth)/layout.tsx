@@ -31,11 +31,10 @@ export default function AuthLayout({ children }: PropsWithChildren) {
                   />
 
                   <div className="-intro-x mt-10 text-4xl font-medium leading-tight text-white">
-                    Lorem ipsum dolor <br />
-                    sign in to your account.
+                    Selamat Datang.
                   </div>
                   <div className="-intro-x mt-5 text-lg text-white text-opacity-70 dark:text-slate-400">
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit.
+                    Masuk dengan email dan password yang terdaftar.
                   </div>
                 </div>
               </div>

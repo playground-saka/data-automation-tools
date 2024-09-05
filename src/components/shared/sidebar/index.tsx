@@ -38,15 +38,15 @@ type MenuItem = {
 };
 
 const menuList: MenuItem[] = [
-  {
-    id: 0,
-    label: "Notifikasi",
-    icon: (
-      <BellIcon className="h-4 w-4 text-zinc-800/80 group-hover:text-zinc-800" />
-    ),
-    notificationCount: 14,
-    link: "/notification",
-  },
+  // {
+  //   id: 0,
+  //   label: "Notifikasi",
+  //   icon: (
+  //     <BellIcon className="h-4 w-4 text-zinc-800/80 group-hover:text-zinc-800" />
+  //   ),
+  //   notificationCount: 14,
+  //   link: "/notification",
+  // },
   {
     id: 1,
     label: "Dashboard",

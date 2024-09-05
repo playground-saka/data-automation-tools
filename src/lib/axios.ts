@@ -1,10 +1,12 @@
 import axios, { AxiosInstance } from "axios";
 import { store } from "@/store/store";
 import { setLogout } from "@/store/slices/authSlice";
+import { useRouter } from "next/router";
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,
 });
+
 
 axiosInstance.defaults.headers.common["Access-Control-Allow-Origin"] = "*";
 

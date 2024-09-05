@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "@/lib/axios";
 import { store } from "@/store/store";
 import { setLogout } from "@/store/slices/authSlice";
 import { useRouter } from "next/router";

@@ -1,10 +1,11 @@
-import axios, { AxiosInstance } from "axios";
+import axios from "axios";
 import { store } from "@/store/store";
 import { setLogout } from "@/store/slices/authSlice";
 import { useRouter } from "next/router";
 
-const axiosInstance: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL,
+const axiosInstance = axios.create({
+  baseURL:
+    process.env.NEXT_PUBLIC_BASE_URL,
 });
 
 

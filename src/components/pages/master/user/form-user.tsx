@@ -148,7 +148,7 @@ function FormUser({setOpenForm}: Props) {
                 id="password"
                 type="password"
                 name="password"
-                value={values.password}
+                value={values.password ?? ""}
                 onChange={(e) => setFieldValue("password", e.target.value)}
                 className="col-span-3"
               />

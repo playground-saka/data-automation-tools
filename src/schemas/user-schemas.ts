@@ -24,6 +24,8 @@ export const schemaFormUser = z
       .string({
         required_error: "Kata sandi is required",
         invalid_type_error: "Kata sandi must be a string",
-      })
-      .nullable(),
+      }).nullable().refine((val) => val === null || val.length >= 8, {
+        message: "Kata sandi harus memiliki panjang minimal 8 karakter",
+        path: ["password"],
+      }),
   })

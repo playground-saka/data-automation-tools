@@ -55,12 +55,10 @@ function FormLogSheet({setOpenForm}: Props) {
             });
           })
           .catch((err) => {
-            console.log(err);
-            alert("asuuu")
-            // toast({
-            //   title: "Error",
-            //   description: err.response.data.error,
-            // });
+            toast({
+              title: "Error",
+              description: err.response.data.message,
+            });
           });
       }}
       validateOnChange={true}

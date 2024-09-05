@@ -261,6 +261,7 @@ function TableReportManual({date,id}: Props) {
     fetchDataAsync();
   }, [currentPage, perPage, id, date]);
 
+
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 

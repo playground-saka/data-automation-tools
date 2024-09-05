@@ -109,17 +109,18 @@ function FormUpload(params:Props){
       }
 
       const jsonData: any[] = dataExcel.splice(firstDataRowIndex);
+      let lengthValidate = params.type == "sistem" ? ((jsonData.length) - 2) : jsonData.length;
 
       //VALIDASI JIKA DATE TIDAK SESUAI
-      for (let i = 4; i < jsonData.length; i++) {
-        let dateExcel = formatDateTime(jsonData[i][1], "m-Y");
+      for (let i = 4; i < lengthValidate; i++) {
         
-        if (dateExcel !== params.date) {
+        if (formatDateTime(jsonData[i][1], "m-Y") != params.date) {
           toast({
             title: "Error",
-            description: "Tanggal pada file excel tidak sesuai dengan data Logsheet Status",
-          })
-          onCancelUpload()
+            description:
+              "Tanggal pada file excel tidak sesuai dengan data Logsheet Status",
+          });
+          onCancelUpload();
           return false;
         }
       }
@@ -235,10 +236,10 @@ function FormUpload(params:Props){
     const link = document.createElement("a");
     if (params.type == "sistem") {
       link.href = "/excel/LP PLTMH sistem.xlsx";
-      link.download = "LP PLTMH sistem.xlsx";
+      link.download = "logsheet-wilis.xlsx";
     } else {
       link.href = "/excel/LP PLTMH manual.xlsx";
-      link.download = "LP PLTMH manual.xlsx";
+      link.download = "logsheet-manual.xlsx";
     }
     link.click();
   }

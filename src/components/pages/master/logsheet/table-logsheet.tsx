@@ -33,6 +33,9 @@ import { LogSheetontext } from '../../../providers/LogSheetProvider'
 import { getLogsheet } from '@/app/api/logsheet'
 import { formatDateTime } from '@/utils/formatter'
 import { useRouter } from 'next/navigation'
+import DatePicker from "react-datepicker";
+
+import "react-datepicker/dist/react-datepicker.css";
 
 type Props = {}
 
@@ -149,7 +152,7 @@ function TableLogsheet({}: Props) {
           ) : (
             <div className={`cursor-pointer text-xs ${!row.original.logsheetManual && 'cursor-not-allowed'}`} title={!row.original.logsheetManual ? 'File Manual Belum di Upload' : ''} onClick={row.original.logsheetManual ? () =>
                 router.push(
-                  `/master/logsheet/upload/${row.original.pelanggan.id}/sistem`
+                  `/master/logsheet/upload/${row.original.id}/sistem`
                 )
               : ()=>{}}>
               Belum di Upload
@@ -166,10 +169,23 @@ function TableLogsheet({}: Props) {
   const [perPage, setPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [month, setMonth] = useState<string>("");
+  const onChangeMonth = (date: Date | null) => {
+    setStartDate(date);
+    let d = new Date(date ?? new Date());
+
+    // Get the month and year
+    let month = String(d.getMonth() + 1).padStart(2, "0"); // Ensure two digits
+    let year = d.getFullYear();
+
+    // Format as MM-YYYY
+    let formattedDate = `${month}-${year}`;
+    setMonth(formattedDate);
+  }
 
   const fetchData = React.useCallback(async () => {
     setLoading(true);
-    await getLogsheet(currentPage, perPage)
+    await getLogsheet(currentPage, perPage, month)
     .then((res) => {
       setData(res);
       setTotalPages(res.total_pages); 
@@ -179,11 +195,11 @@ function TableLogsheet({}: Props) {
     }).finally(() => {
       setLoading(false);
     });
-  }, [currentPage, perPage]);
+  }, [currentPage, perPage, month]);
   
   useEffect(() => {
     fetchData();
-  }, [triggerFetch, fetchData]);
+  }, [triggerFetch, fetchData, currentPage, perPage, month]);
 
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -192,6 +208,7 @@ function TableLogsheet({}: Props) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  const [startDate, setStartDate] = useState<Date | null>(null)
 
   const table = useReactTable({
     data: data?.data ?? [],
@@ -224,32 +241,44 @@ function TableLogsheet({}: Props) {
           }
           className="max-w-sm"
         />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button type='button' variant="outline" className="ml-auto">
-              Filter Kolom <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column:any) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className='ml-auto gap-3 flex'>
+          <DatePicker
+            selected={startDate}
+            onChange={(date) => onChangeMonth(date)}
+            dateFormat="MM-yyyy"
+            showMonthYearPicker
+            showFullMonthYearPicker
+            placeholderText="Select Month and Year"
+            shouldCloseOnSelect={true}
+            customInput={<Input placeholder="Pilih Bulan"  value={month}/>}
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button type="button" variant="outline" className="ml-auto">
+                Filter Kolom <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column: any) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -306,7 +335,9 @@ function TableLogsheet({}: Props) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setCurrentPage(data?.prev_page ? data?.prev_page : 1)}
+            onClick={() =>
+              setCurrentPage(data?.prev_page ? data?.prev_page : 1)
+            }
             disabled={!data?.per_page || data?.current_page === 1}
           >
             Sebelumnya
@@ -314,7 +345,9 @@ function TableLogsheet({}: Props) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setCurrentPage(data?.next_page ? data?.next_page : 1)}
+            onClick={() =>
+              setCurrentPage(data?.next_page ? data?.next_page : 1)
+            }
             disabled={!data?.next_page}
           >
             Selanjutnya

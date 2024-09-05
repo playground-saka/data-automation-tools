@@ -1,40 +1,49 @@
-export function formatDateTime(
-  dateTime: Date | string,
-  format: string
-): string {
-  // Parse the dateTime if it's a string
-  const date = typeof dateTime === "string" ? new Date(dateTime) : dateTime;
-
-  // Check if the date is valid
-  if (isNaN(date.getTime())) {
-    throw new RangeError("Invalid time value");
+export const formatDateTime = (dateTime: Date | string | undefined | null, format: string): string => {
+  if (typeof dateTime === "undefined") {
+    return "";
   }
 
-  // Define options based on the format
-  const options: Intl.DateTimeFormatOptions = {};
+  const date = typeof dateTime === "string" ? new Date(dateTime) : dateTime;
+  if (!(date instanceof Date) || isNaN(date.getTime())) {
+    throw new RangeError(`Invalid time value: ${dateTime}`);
+  }
+
+  const options: Intl.DateTimeFormatOptions = {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  };
 
   switch (format) {
     case "d-m-Y":
-      options.day = "2-digit";
-      options.month = "long"; // Use 'long' to get full month name
-      options.year = "numeric";
       break;
     case "d-m-Y H:i:s":
-      options.day = "2-digit";
-      options.month = "long"; // Use 'long' to get full month name
-      options.year = "numeric";
       options.hour = "2-digit";
       options.minute = "2-digit";
       options.second = "2-digit";
       break;
     case "m-Y":
-      options.month = "long"; // Use 'long' to get full month name
-      options.year = "numeric";
+      delete options.day;
+      break;
+    case "M":
+      options.month = "long";
+      delete options.day;
+      delete options.year;
       break;
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
 
-  // Format date in Indonesian locale
   return new Intl.DateTimeFormat("id-ID", options).format(date);
-}
+};
+
+export const convertToYmd = (dateString: string) => {
+  // Split the input string by "-"
+  const [month, year] = dateString.split("-").map(Number);
+  // Create a new Date object with the first day of the given month and year
+  const date = new Date(year, month); // month is 0-indexed in JS
+  // Format the date to Y-m-d
+  const formattedDate = date.toISOString().slice(0, 10); // "Y-m-d" format
+  return formattedDate;
+};
+

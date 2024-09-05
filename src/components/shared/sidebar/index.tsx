@@ -64,6 +64,7 @@ const menuList: MenuItem[] = [
     ),
     hasDropdown: true,
     dropdownItems: [
+      { label: "User", link: "/master/user" },
       { label: "Kategori", link: "/master/kategori" },
       { label: "Pelanggan", link: "/master/pelanggan" },
       { label: "Formula", link: "/master/formula" },

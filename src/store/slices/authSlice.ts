@@ -6,6 +6,7 @@ export const initialState: Model.Auth.AuthData = {
   user: {
     id: null,
     username: "",
+    fullName: "",
     email: "",
     isActive: false,
   },

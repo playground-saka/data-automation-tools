@@ -10,12 +10,13 @@ import { TablePreview } from "./table-preview";
 import { DataTableColumnHeader } from "@/components/data-table-column-header";
 import { postLogsheetManual, postLogsheetSistem } from "@/app/api/logsheet";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { DownloadCloudIcon, DownloadIcon, UploadCloudIcon } from "lucide-react";
+import { DownloadCloudIcon, UploadCloudIcon } from "lucide-react";
 import { formatDateTime } from "@/utils/formatter";
 
 
 type Props = {
   pelangganId: any;
+  pelangganCode: any;
   date: string;
   type: string;
 };
@@ -54,9 +55,8 @@ function FormUpload(params:Props){
     // VALIDASI FILE TIDAK DITEMUKAN
     if(!fileExcel) {
       toast({
-        title: "Error",
+        title: "Kesalahan",
         description: "File Tidak Ditemukan",
-        action: <ToastAction altText="Dismiss">Dismiss</ToastAction>,
       });
       return false
     }
@@ -66,19 +66,19 @@ function FormUpload(params:Props){
     const regex = params.type == 'manual' ? /manual/i : /sistem/i;
     if (!regex.test(fileName)) {
       toast({
-        title: "Error",
+        title: "Kesalahan",
         description: "Nama File Tidak Sesuai",
-        action: <ToastAction altText="Dismiss">Dismiss</ToastAction>,
+        action: <ToastAction altText="Dismiss">Tutup</ToastAction>,
       });
-      return 0;
+      return false;
     }
 
     // VALIDASI FILE EXTENSION
     if (!allowFileTypes.includes(fileExcel?.type)){
       toast({
-        title: "Error",
+        title: "Kesalahan",
         description: "File type not allowed",
-        action: <ToastAction altText="Dismiss">Dismiss</ToastAction>,
+        action: <ToastAction altText="Dismiss">Tutup</ToastAction>,
       });
       return false;
     }
@@ -109,14 +109,27 @@ function FormUpload(params:Props){
       }
 
       const jsonData: any[] = dataExcel.splice(firstDataRowIndex);
-      let lengthValidate = params.type == "sistem" ? ((jsonData.length) - 2) : jsonData.length;
 
+      setTitleExcel(jsonData[0] ?? "");
+      setPelangganId(jsonData[1] ?? "");
+      setNamaPelanggan(jsonData[2] ?? "");
+      
+      if(((jsonData[1][0]).split(":")[1]).replace(" ","") != (params.pelangganCode).replace(" ","")){
+        toast({
+          title: "Kesalahan",
+          description: "Terdapat perbedaan kode/pelanggan pada file yang diupload"
+        })
+        onCancelUpload();
+        return false;
+      }
+      
       //VALIDASI JIKA DATE TIDAK SESUAI
+      let lengthValidate = params.type == "sistem" ? ((jsonData.length) - 2) : jsonData.length;
       for (let i = 4; i < lengthValidate; i++) {
         
         if (formatDateTime(jsonData[i][1], "m-Y") != params.date) {
           toast({
-            title: "Error",
+            title: "Kesalahan",
             description:
               "Tanggal pada file excel tidak sesuai dengan data Logsheet Status",
           });
@@ -124,11 +137,6 @@ function FormUpload(params:Props){
           return false;
         }
       }
-      
-
-      setTitleExcel(jsonData[0] ?? "");
-      setPelangganId(jsonData[1] ?? "");
-      setNamaPelanggan(jsonData[2] ?? "");
 
       // VALIDASI COLUMN
       if (
@@ -140,7 +148,7 @@ function FormUpload(params:Props){
           params.type == "manual")
       ) {
         toast({
-          title: "Gagal",
+          title: "Kesalahan",
           description: "Terdapat data yang tidak sesuai",
         });
         return false;
@@ -177,7 +185,6 @@ function FormUpload(params:Props){
         }
       });
       setData(tempData);
-
       setExcelFile(fileExcel);
     };
   }
@@ -207,7 +214,7 @@ function FormUpload(params:Props){
         .catch((err) => {
           // if (input) input.value = "";
           toast({
-            title: "Gagal",
+            title: "Kesalahan",
             description: err.response.data.message,
           });
         }).finally(()=>{
@@ -224,7 +231,7 @@ function FormUpload(params:Props){
         })
         .catch((err) => {
           toast({
-            title: "Gagal",
+            title: "Kesalahan",
             description: err.response.data.message,
           });
         }).finally(()=>{

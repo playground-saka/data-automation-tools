@@ -141,9 +141,10 @@ function Index({}: Props) {
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <h1 className="text-xs text-stone-800 capitalize">{auth.user?.username}</h1>
+              <h1 className="text-xs text-stone-800 capitalize">{auth.user?.fullName}</h1>
               <h1 className="text-xs text-stone-800/70">
-                Chief Technology Officer
+                Administrator
+                {/* Chief Technology Officer */}
               </h1>
             </div>
           </div>

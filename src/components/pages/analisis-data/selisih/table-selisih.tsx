@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import {
   ColumnDef,
@@ -35,6 +35,9 @@ import Link from 'next/link'
 import { exportDifferentLogsheet, getLogsheet } from '@/app/api/logsheet'
 import { formatDateTime } from '@/utils/formatter'
 import { toast } from '@/components/ui/use-toast'
+import DatePicker from 'react-datepicker'
+import "react-datepicker/dist/react-datepicker.css";
+
 
 type Props = {}
 
@@ -169,6 +172,23 @@ function TableSelisih({}: Props) {
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
 
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [month, setMonth] = useState<string>("");
+
+  const onChangeMonth = (date: Date | null) => {
+    setStartDate(date);
+    let d = new Date(date ?? new Date());
+
+    // Get the month and year
+    let month = String(d.getMonth() + 1).padStart(2, "0"); // Ensure two digits
+    let year = d.getFullYear();
+
+    // Format as MM-YYYY
+    let formattedDate = `${month}-${year}`;
+    setMonth(formattedDate);
+  };
+
+
   const table = useReactTable({
     data: data?.data ?? [],
     columns,
@@ -187,13 +207,12 @@ function TableSelisih({}: Props) {
       rowSelection,
     },
   });
-  
   useEffect(() => {
     let isMounted = true
     const fetchDataAsync = async () => {
       setLoading(true);
       try {
-        const res = await getLogsheet(currentPage, perPage)
+        const res = await getLogsheet(currentPage, perPage,month)
         if (isMounted) {
           setData(res);
           setTotalPages(res.total_pages);
@@ -210,7 +229,7 @@ function TableSelisih({}: Props) {
     return () => {
       isMounted = false
     }
-  }, [currentPage, perPage])
+  }, [currentPage, perPage, month]);
 
   const exportDifferentData = async (id:number,namaPelanggan:string,date:string):Promise<void> => {
     await exportDifferentLogsheet(id, date)
@@ -253,32 +272,44 @@ function TableSelisih({}: Props) {
           }
           className="max-w-sm"
         />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Filter Kolom <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className='ml-auto flex gap-2'>
+          <DatePicker
+            selected={startDate}
+            onChange={(date) => onChangeMonth(date)}
+            dateFormat="MM-yyyy"
+            showMonthYearPicker
+            showFullMonthYearPicker
+            placeholderText="Select Month and Year"
+            shouldCloseOnSelect={true}
+            customInput={<Input placeholder="Pilih Bulan" value={month} />}
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-auto">
+                Filter Kolom <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
       <div className="rounded-md border">
         <Table>

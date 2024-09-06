@@ -28,9 +28,6 @@ type Props = {
 function FormLogSheet({setOpenForm}: Props) {
   const { triggerFetchData } = useContext(LogSheetontext);
   type LogSheetFormInputs = TypeOf<typeof schemaFormLogSheet>;
-
-  useEffect(()=>{
-  },[])
   return (
     <Formik<LogSheetFormInputs>
       initialValues={{

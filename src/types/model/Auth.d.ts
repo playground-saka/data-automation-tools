@@ -3,6 +3,7 @@ declare namespace Model {
     interface User {
       id: number | null;
       username: string;
+      fullName: string;
       email: string;
       isActive: boolean;
     }

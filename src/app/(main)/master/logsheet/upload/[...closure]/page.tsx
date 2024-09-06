@@ -13,6 +13,7 @@ function Page () {
   const params = useParams();
   const router = useRouter();
   const [pelangganId, setPelangganId] = useState<any>("");
+  const [codePelanggan, setCodePelanggan] = useState<any>("");
   const [date, setDate] = useState<string>("");
   const [type, setType] = useState<string>("");
 
@@ -20,6 +21,7 @@ function Page () {
     await detailLogsheet(id)
     .then((res) => {
       setPelangganId(res.pelanggan.id);
+      setCodePelanggan(res.pelanggan.pelangganId);
       setDate(formatDateTime(res.date,"m-Y"))
     })
     .catch((err) => {
@@ -49,7 +51,7 @@ function Page () {
         </h1>
         <Breadcrumbs />
       </div>
-      <FormUpload pelangganId={pelangganId} date={date} type={type} />
+      <FormUpload pelangganId={pelangganId} pelangganCode={codePelanggan} date={date} type={type} />
     </section>
   );
 }

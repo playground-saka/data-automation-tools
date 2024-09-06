@@ -28,6 +28,7 @@ export const authSlice = createSlice({
       state.user = {
         id: null,
         username: "",
+        fullName: "",
         email: "",
         isActive: false,
       };

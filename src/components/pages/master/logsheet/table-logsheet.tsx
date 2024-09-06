@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown } from "lucide-react"
+import { ArrowUpDown, ChevronDown, LoaderIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -241,7 +241,7 @@ function TableLogsheet({}: Props) {
           }
           className="max-w-sm"
         />
-        <div className='ml-auto gap-3 flex'>
+        <div className="ml-auto gap-3 flex">
           <DatePicker
             selected={startDate}
             onChange={(date) => onChangeMonth(date)}
@@ -250,7 +250,7 @@ function TableLogsheet({}: Props) {
             showFullMonthYearPicker
             placeholderText="Select Month and Year"
             shouldCloseOnSelect={true}
-            customInput={<Input placeholder="Pilih Bulan"  value={month}/>}
+            customInput={<Input placeholder="Pilih Bulan" value={month} />}
           />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -323,7 +323,13 @@ function TableLogsheet({}: Props) {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  {loading ? (
+                    <>
+                      <LoaderIcon className="animate-spin" /> Loading...
+                    </>
+                  ) : (
+                    "Data Tidak Tersedia"
+                  )}
                 </TableCell>
               </TableRow>
             )}

@@ -41,7 +41,7 @@ export default function ManualChart(){
     <Card>
       <CardHeader>
         <CardTitle>Grafik Rata-rata Manual</CardTitle>
-        <CardDescription>2024</CardDescription>
+        <CardDescription>{new Date().getFullYear()}</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>

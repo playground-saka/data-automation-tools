@@ -25,15 +25,13 @@ export default function Login() {
     .then((res) => {
       dispatch(setLogin(res));
       router.push("/dashboard");
-      setLoading(false);
     })
     .catch((err) => {
-      console.log(err);
-      
       toast({
         title: "Unauthorized",
         description: err.response.data.message,
       });
+    }).finally(()=>{
       setLoading(false);
     });
   };

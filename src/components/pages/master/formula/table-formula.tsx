@@ -12,7 +12,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, Trash2Icon } from "lucide-react"
+import { ArrowUpDown, ChevronDown, LoaderIcon, Trash2Icon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -54,6 +54,7 @@ function TableFormula({setOpenForm}: Props) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  const [loading, setLoading] = useState(false);
   const columns: ColumnDef<Model.Formula.FormulaData>[] = [
     {
       accessorKey: "namaPelanggan",
@@ -166,6 +167,7 @@ function TableFormula({setOpenForm}: Props) {
 
 
   const fetchData = async() => {
+    setLoading(true);
     await getFormulas()
     .then((res) => {
       setData(res)
@@ -177,6 +179,8 @@ function TableFormula({setOpenForm}: Props) {
         title: "Error",
         description: err.response.data.message,
       })
+    }).finally(() => {
+      setLoading(false);
     })
   }
 
@@ -218,7 +222,7 @@ function TableFormula({setOpenForm}: Props) {
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button type='button' variant="outline" className="ml-auto">
+            <Button type="button" variant="outline" className="ml-auto">
               Filter Kolom <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -286,7 +290,13 @@ function TableFormula({setOpenForm}: Props) {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  {loading ? (
+                    <>
+                      <LoaderIcon className="animate-spin" /> Loading...
+                    </>
+                  ) : (
+                    "Data Tidak Tersedia"
+                  )}
                 </TableCell>
               </TableRow>
             )}
@@ -296,7 +306,7 @@ function TableFormula({setOpenForm}: Props) {
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="space-x-2">
           <Button
-            type='button'
+            type="button"
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
@@ -305,7 +315,7 @@ function TableFormula({setOpenForm}: Props) {
             Sebelumnya
           </Button>
           <Button
-            type='button'
+            type="button"
             variant="outline"
             size="sm"
             onClick={() => table.nextPage()}

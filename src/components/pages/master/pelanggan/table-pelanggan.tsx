@@ -10,7 +10,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, Trash2Icon } from "lucide-react"
+import { ArrowUpDown, ChevronDown, LoaderIcon, Trash2Icon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -251,7 +251,7 @@ function TablePelanggan({ setOpenForm }: Props) {
                       <TableHead
                         key={header.id}
                         colSpan={header.colSpan ? header.colSpan : 1}
-                        className='justify-center'
+                        className="justify-center"
                       >
                         {header.isPlaceholder
                           ? null
@@ -288,7 +288,13 @@ function TablePelanggan({ setOpenForm }: Props) {
                     colSpan={columns.length}
                     className="h-24 text-center"
                   >
-                    No results.
+                    {loading ? (
+                      <>
+                        <LoaderIcon className="animate-spin" /> Loading...
+                      </>
+                    ) : (
+                      "Data Tidak Tersedia"
+                    )}
                   </TableCell>
                 </TableRow>
               )}

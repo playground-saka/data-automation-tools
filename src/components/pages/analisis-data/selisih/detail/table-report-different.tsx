@@ -14,6 +14,7 @@ import {
   SortingState,
   VisibilityState,
 } from "@tanstack/react-table";
+import { LoaderIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -95,9 +96,7 @@ function TableReportDifferent({ id, date }: Props) {
                   </TableCell>
                   <TableCell className="text-center">
                     {row.selisihPowerP < 0 ? (
-                      <span className="text-red-500">
-                        {row.selisihPowerP}
-                      </span>
+                      <span className="text-red-500">{row.selisihPowerP}</span>
                     ) : (
                       <span className="text-green-400">
                         {row.selisihPowerP}
@@ -142,6 +141,24 @@ function TableReportDifferent({ id, date }: Props) {
               )
             )}
           </TableBody>
+          {loading && (
+            <TableBody>
+              <TableRow>
+                <TableCell
+                  colSpan={10}
+                  className="h-24 text-center"
+                >
+                  {loading ? (
+                    <>
+                      <LoaderIcon className="animate-spin" /> Loading...
+                    </>
+                  ) : (
+                    "Data Tidak Tersedia"
+                  )}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          )}
         </Table>
       </div>
       <div className="flex items-center space-x-2 py-4">

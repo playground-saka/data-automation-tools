@@ -42,7 +42,7 @@ export default function SistemChart(){
     <Card>
       <CardHeader>
         <CardTitle>Grafik Rata-rata Wilis</CardTitle>
-        <CardDescription>2024</CardDescription>
+        <CardDescription>{new Date().getFullYear()}</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>

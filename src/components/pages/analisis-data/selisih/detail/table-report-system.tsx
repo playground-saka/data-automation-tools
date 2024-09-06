@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDateTime } from "@/utils/formatter";
 import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, SortingState, useReactTable, VisibilityState } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown } from "lucide-react";
+import { ArrowUpDown, ChevronDown, LoaderIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -261,7 +261,13 @@ function TableReportSystem({id,date}: Props) {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  {loading ? (
+                    <>
+                      <LoaderIcon className="animate-spin" /> Loading...
+                    </>
+                  ) : (
+                    "Data Tidak Tersedia"
+                  )}
                 </TableCell>
               </TableRow>
             )}

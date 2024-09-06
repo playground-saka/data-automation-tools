@@ -42,7 +42,7 @@ export default function SelisihChart(){
     <Card>
       <CardHeader>
         <CardTitle>Grafik Rata-rata Selisih</CardTitle>
-        <CardDescription>2024</CardDescription>
+        <CardDescription>{new Date().getFullYear()}</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
@@ -70,9 +70,23 @@ export default function SelisihChart(){
                 />
               }
             />
-            <Bar dataKey="selisihPowerP" name={"Selisih Power P"} fill="#2596be" radius={20} />
-            <Bar dataKey="selisihCurrentR" name={"Selisih Current R"} fill="#eeeee4" radius={20} />
-            <Bar dataKey="selisihVoltageRS" name={"Selisih Voltage RS"} fill="#154c79" radius={20}
+            <Bar
+              dataKey="selisihPowerP"
+              name={"Selisih Power P"}
+              fill="#2596be"
+              radius={20}
+            />
+            <Bar
+              dataKey="selisihCurrentR"
+              name={"Selisih Current R"}
+              fill="#eeeee4"
+              radius={20}
+            />
+            <Bar
+              dataKey="selisihVoltageRS"
+              name={"Selisih Voltage RS"}
+              fill="#154c79"
+              radius={20}
             />
           </BarChart>
         </ChartContainer>

@@ -20,7 +20,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, LoaderIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -290,7 +290,7 @@ function TableReportManual({date,id}: Props) {
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header,index) => {
+                {headerGroup.headers.map((header, index) => {
                   return (
                     <TableHead key={index}>
                       {header.isPlaceholder
@@ -307,12 +307,12 @@ function TableReportManual({date,id}: Props) {
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row,index) => (
+              table.getRowModel().rows.map((row, index) => (
                 <TableRow
                   key={index}
                   data-state={row.getIsSelected() && "selected"}
                 >
-                  {row.getVisibleCells().map((cell,index) => (
+                  {row.getVisibleCells().map((cell, index) => (
                     <TableCell key={index}>
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -328,7 +328,13 @@ function TableReportManual({date,id}: Props) {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  {loading ? (
+                    <>
+                      <LoaderIcon className="animate-spin" /> Loading...
+                    </>
+                  ) : (
+                    "Data Tidak Tersedia"
+                  )}
                 </TableCell>
               </TableRow>
             )}

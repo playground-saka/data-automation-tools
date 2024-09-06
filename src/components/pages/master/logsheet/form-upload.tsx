@@ -4,7 +4,7 @@ import { ToastAction } from "@/components/ui/toast";
 import { toast } from "@/components/ui/use-toast";
 import { Column, ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import { TablePreview } from "./table-preview";
 import { DataTableColumnHeader } from "@/components/data-table-column-header";
@@ -35,8 +35,12 @@ function FormUpload(params:Props){
     data,
     columns: column,
     getCoreRowModel: getCoreRowModel(),
-    
   });
+
+  useEffect(() => {
+    onCancelUpload()
+  },[])
+
   const setExcelFile = (file: File) => {
     setExcelFileState(file);
   }
@@ -58,6 +62,7 @@ function FormUpload(params:Props){
         title: "Kesalahan",
         description: "File Tidak Ditemukan",
       });
+      onCancelUpload();
       return false
     }
 
@@ -70,6 +75,7 @@ function FormUpload(params:Props){
         description: "Nama File Tidak Sesuai",
         action: <ToastAction altText="Dismiss">Tutup</ToastAction>,
       });
+      onCancelUpload();
       return false;
     }
 
@@ -80,6 +86,7 @@ function FormUpload(params:Props){
         description: "File type not allowed",
         action: <ToastAction altText="Dismiss">Tutup</ToastAction>,
       });
+      onCancelUpload();
       return false;
     }
 
@@ -151,6 +158,7 @@ function FormUpload(params:Props){
           title: "Kesalahan",
           description: "Terdapat data yang tidak sesuai",
         });
+        onCancelUpload();
         return false;
       }
 
@@ -219,6 +227,7 @@ function FormUpload(params:Props){
           });
         }).finally(()=>{
           setLoading(false);
+          onCancelUpload();
         });
     }else{
       await postLogsheetSistem(formData)
@@ -236,6 +245,8 @@ function FormUpload(params:Props){
           });
         }).finally(()=>{
           setLoading(false);
+          onCancelUpload();
+
         });
     }
   }

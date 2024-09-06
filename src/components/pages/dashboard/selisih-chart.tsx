@@ -41,7 +41,7 @@ export default function SelisihChart(){
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Grafik Rata-rata Wilis</CardTitle>
+        <CardTitle>Grafik Rata-rata Selisih</CardTitle>
         <CardDescription>2024</CardDescription>
       </CardHeader>
       <CardContent>

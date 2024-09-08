@@ -7,13 +7,24 @@ export const LogSheetProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const [logsheet, setLogSheet] = useState<Model.LogSheet.LogSheetData | null>(
+    null
+  );
+  const [rollBackType, setRollBackType] = useState<string | null>(null);
   const [triggerFetch, setTriggerFetch] = useState(false);
   const triggerFetchData = useCallback(() => {
     setTriggerFetch((prev) => !prev);
   }, []);
   return (
     <LogSheetontext.Provider
-      value={{ triggerFetchData, triggerFetch }}
+      value={{
+        triggerFetchData,
+        triggerFetch,
+        setLogSheet,
+        logsheet,
+        setRollBackType,
+        rollBackType,
+      }}
     >
       {children}
     </LogSheetontext.Provider>

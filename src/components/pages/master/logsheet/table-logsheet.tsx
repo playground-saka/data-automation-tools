@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, LoaderIcon } from "lucide-react"
+import { ArrowUpDown, ChevronDown, LoaderIcon, Undo2Icon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -35,12 +35,14 @@ import { formatDateTime } from '@/utils/formatter'
 import { useRouter } from 'next/navigation'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 
 type Props = {}
 
 function TableLogsheet({}: Props) {
   const router = useRouter()
+  const { triggerFetch,setLogSheet,setRollBackType } = useContext(LogSheetontext);
   const columns: ColumnDef<Model.LogSheet.LogSheetData>[] = [
     {
       accessorKey: "date",
@@ -96,28 +98,45 @@ function TableLogsheet({}: Props) {
         );
       },
       cell: ({ row }) => (
-        <div
-          className={`
-        rounded-md px-2 py-1 w-fit
-        ${
-          row.getValue("logsheetManual")
-            ? "bg-indigo-100 text-indigo-700"
-            : "bg-gray-100 text-gray-500"
-        }
-      `}
-        >
-          {row.getValue("logsheetManual") ? (
-            <p className=" text-xs text-center">Selesai di Upload</p>
+        <div>
+          {row.getValue("logsheetManual") || true ? (
+            <div className="w-full flex gap-3">
+              <div
+                className={`rounded-md px-2 py-1 w-fit bg-indigo-100 text-indigo-700`}
+              >
+                <p className=" text-xs text-center"> Selesai di Upload</p>
+              </div>
+              <div
+                className={`rounded-md px-2 py-1 w-fit text-xs flex items-center gap-1 bg-orange-300 cursor-pointer`}
+                onClick={() => {
+                  setLogSheet(row.original);
+                  setRollBackType("manual");
+                }}
+              >
+                <Undo2Icon size={17} /> Rollback
+              </div>
+            </div>
           ) : (
             <div
-              className="cursor-pointer text-xs"
-              onClick={() =>
-                router.push(
-                  `/master/logsheet/upload/${row.original.id}/manual`
-                )
+              className={`
+              rounded-md px-2 py-1 w-fit
+              ${
+                row.getValue("logsheetManual")
+                  ? "bg-indigo-100 text-indigo-700"
+                  : "bg-gray-100 text-gray-500"
               }
+            `}
             >
-              Belum di Upload
+              <div
+                className="cursor-pointer text-xs"
+                onClick={() =>
+                  router.push(
+                    `/master/logsheet/upload/${row.original.id}/manual`
+                  )
+                }
+              >
+                Belum di Upload
+              </div>
             </div>
           )}
         </div>
@@ -138,25 +157,53 @@ function TableLogsheet({}: Props) {
         );
       },
       cell: ({ row }) => (
-        <div
-          className={`rounded-md px-2 py-1 w-fit
-        ${
-          row.getValue("logsheetSistem")
-            ? "bg-indigo-100 text-indigo-700"
-            : "bg-gray-100 text-gray-500"
-        }
-      `}
-        >
-          {row.getValue("logsheetSistem") ? (
-            <p className="text-xs text-center">Selesai di Upload</p>
-          ) : (
-            <div className={`cursor-pointer text-xs ${!row.original.logsheetManual && 'cursor-not-allowed'}`} title={!row.original.logsheetManual ? 'File Manual Belum di Upload' : ''} onClick={row.original.logsheetManual ? () =>
-                router.push(
-                  `/master/logsheet/upload/${row.original.id}/sistem`
-                )
-              : ()=>{}}>
-              Belum di Upload
+        <div>
+          {row.getValue("logsheetSistem") || true ? (
+            <div className="w-full flex gap-3">
+              <div
+                className={`rounded-md px-2 py-1 w-fit bg-indigo-100 text-indigo-700`}
+              >
+                <p className=" text-xs text-center">Selesai di Upload</p>
+              </div>
+              <div
+                className={`rounded-md px-2 py-1 w-fit text-xs flex items-center gap-1 bg-orange-300 cursor-pointer`}
+                onClick={() => {
+                  setLogSheet(row.original);
+                  setRollBackType("sistem");
+                }}
+              >
+                <Undo2Icon size={17} /> Rollback
+              </div>
             </div>
+          ) : (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div
+                    className={`text-xs rounded-md px-2 py-1 w-fit ${
+                      !row.original.logsheetManual && "cursor-not-allowed"
+                    } ${
+                      row.getValue("logsheetSistem")
+                        ? "bg-indigo-100 text-indigo-700"
+                        : "bg-gray-100 text-gray-500"
+                    } `}
+                    onClick={
+                      row.original.logsheetManual
+                        ? () =>
+                            router.push(
+                              `/master/logsheet/upload/${row.original.id}/sistem`
+                            )
+                        : () => {}
+                    }
+                  >
+                    Belum di Upload
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Lakukan Upload Form Manual Terlebih Dahulu</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
         </div>
       ),
@@ -164,7 +211,6 @@ function TableLogsheet({}: Props) {
     },
   ];
   const [data,setData] = useState<Model.DataTable.ResponseDt<Model.LogSheet.LogSheetData[]>>()
-  const { triggerFetch } = useContext(LogSheetontext);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [perPage, setPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(0);

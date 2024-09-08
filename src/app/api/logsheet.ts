@@ -50,3 +50,13 @@ export async function exportDifferentLogsheet(pelangganId:number,date:string): P
   
   return response.data;
 }
+
+export async function rollBackLogSheet(logsheet:Model.LogSheet.LogSheetData,rollBackType:string): Promise<any> {
+  const body = {
+    pelangganId: logsheet.pelanggan.id,
+    date: logsheet.years+"-"+logsheet.month,
+    type: rollBackType
+  };  
+  const response = await axiosInstance.post("/rollback-logsheet",body);
+  return response.data;
+}

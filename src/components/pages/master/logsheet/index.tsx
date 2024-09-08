@@ -7,6 +7,7 @@ import TableLogsheet from './table-logsheet'
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import FormLogSheet from './form-logsheet'
 import { LogSheetProvider } from '../../../providers/LogSheetProvider'
+import DialogRollBackLogSheet from './rollback-logsheet'
 
 type Props = {}
 
@@ -38,6 +39,7 @@ function Index({}: Props) {
             </SheetTrigger>
           </div>
           <TableLogsheet />
+          <DialogRollBackLogSheet/>
         </div>
       </Sheet>
     </LogSheetProvider>

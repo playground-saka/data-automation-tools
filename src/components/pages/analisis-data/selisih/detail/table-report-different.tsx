@@ -86,7 +86,7 @@ function TableReportDifferent({ id, date }: Props) {
               (row: Model.ReportDifferent.ReportDifferentData, index) => (
                 <TableRow key={index}>
                   <TableCell className="text-center">
-                    {formatDateTime(row.dateTime, "d-m-Y H:i:s")}
+                    {formatDateTime(row.dateTime, "d-m-Y H:i:s", true)}
                   </TableCell>
                   <TableCell className="text-center">
                     {row.whExportHourly}
@@ -144,10 +144,7 @@ function TableReportDifferent({ id, date }: Props) {
           {loading && (
             <TableBody>
               <TableRow>
-                <TableCell
-                  colSpan={10}
-                  className="h-24 text-center"
-                >
+                <TableCell colSpan={10} className="h-24 text-center">
                   {loading ? (
                     <>
                       <LoaderIcon className="animate-spin" /> Loading...

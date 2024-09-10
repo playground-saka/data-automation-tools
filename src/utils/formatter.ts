@@ -1,9 +1,16 @@
-export const formatDateTime = (dateTime: Date | string | undefined | null, format: string): string => {
+export const formatDateTime = (dateTime: Date | string | undefined | null, format: string,utc=false): string => {
   if (typeof dateTime === "undefined") {
     return "";
   }
 
   const date = typeof dateTime === "string" ? new Date(dateTime) : dateTime;
+  
+  if (date instanceof Date && utc) {
+    date.setHours(date.getHours() - 7);
+  }
+  
+  
+  // date.setHours(date.getHours() + 7);
   if (!(date instanceof Date) || isNaN(date.getTime())) {
     throw new RangeError(`Invalid time value: ${dateTime}`);
   }

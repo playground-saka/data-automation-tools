@@ -55,7 +55,7 @@ function TableLogsheet({}: Props) {
       },
       cell: ({ row }) => (
         <div className="text-xs">
-          {formatDateTime(row.getValue("date"), "m-Y")}
+          {formatDateTime(row.getValue("date"), "m-Y",true)}
         </div>
       ),
       enableHiding: false,
@@ -99,7 +99,7 @@ function TableLogsheet({}: Props) {
       },
       cell: ({ row }) => (
         <div>
-          {row.getValue("logsheetManual") || true ? (
+          {row.getValue("logsheetManual") ? (
             <div className="w-full flex gap-3">
               <div
                 className={`rounded-md px-2 py-1 w-fit bg-indigo-100 text-indigo-700`}
@@ -158,7 +158,7 @@ function TableLogsheet({}: Props) {
       },
       cell: ({ row }) => (
         <div>
-          {row.getValue("logsheetSistem") || true ? (
+          {row.getValue("logsheetSistem") ? (
             <div className="w-full flex gap-3">
               <div
                 className={`rounded-md px-2 py-1 w-fit bg-indigo-100 text-indigo-700`}
@@ -181,7 +181,7 @@ function TableLogsheet({}: Props) {
                 <TooltipTrigger asChild>
                   <div
                     className={`text-xs rounded-md px-2 py-1 w-fit ${
-                      !row.original.logsheetManual && "cursor-not-allowed"
+                      !row.original.logsheetManual ? "cursor-not-allowed" : "cursor-pointer"
                     } ${
                       row.getValue("logsheetSistem")
                         ? "bg-indigo-100 text-indigo-700"
@@ -199,9 +199,11 @@ function TableLogsheet({}: Props) {
                     Belum di Upload
                   </div>
                 </TooltipTrigger>
-                <TooltipContent>
-                  <p>Lakukan Upload Form Manual Terlebih Dahulu</p>
-                </TooltipContent>
+                {!row.original.logsheetManual && (
+                  <TooltipContent>
+                    <p>Lakukan Upload Form Manual Terlebih Dahulu</p>
+                  </TooltipContent>
+                )}
               </Tooltip>
             </TooltipProvider>
           )}

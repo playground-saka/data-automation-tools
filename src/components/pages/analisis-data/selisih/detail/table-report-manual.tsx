@@ -40,7 +40,7 @@ function TableReportManual({date,id}: Props) {
       },
       cell: ({ row }) => (
         <div className="text-xs">
-          {formatDateTime(row.getValue("dateTime"), "d-m-Y H:i:s")}
+          {formatDateTime(row.getValue("dateTime"), "d-m-Y H:i:s",true)}
         </div>
       ),
       enableHiding: false,

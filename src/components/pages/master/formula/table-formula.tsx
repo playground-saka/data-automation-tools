@@ -122,7 +122,7 @@ function TableFormula({setOpenForm}: Props) {
             className="flex flex-row gap-1 items-center cursor-pointer text-xs"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Faktor Tegangan
+            Faktor Power
             <ArrowUpDown className="h-3 w-3" />
           </div>
         );

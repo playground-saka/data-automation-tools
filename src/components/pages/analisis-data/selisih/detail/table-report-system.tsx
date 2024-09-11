@@ -150,8 +150,8 @@ const columns: ColumnDef<Model.ReportSystem.ReportSystemData>[] = [
     enableHiding: false,
   },
   {
-    id: "currentT",
-    accessorKey: "currentT",
+    id: "whExport",
+    accessorKey: "whExport",
     header: ({ column }) => {
       return (
         <div
@@ -164,7 +164,7 @@ const columns: ColumnDef<Model.ReportSystem.ReportSystemData>[] = [
       );
     },
     cell: ({ row }: any) => {
-      return <div className="text-xs">{row.getValue("currentT")}</div>;
+      return <div className="text-xs">{row.getValue("whExport")}</div>;
     },
     enableSorting: true,
     enableHiding: false,

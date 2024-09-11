@@ -219,6 +219,7 @@ function TableReportSystem({id,date}: Props) {
   return (
     <div className="w-full">
       <div className="rounded-md border">
+        <div className="w-full text-center mt-5">Logsheet Sistem Wilis</div>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -259,11 +260,13 @@ function TableReportSystem({id,date}: Props) {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="h-24 w-full"
                 >
                   {loading ? (
                     <>
-                      <LoaderIcon className="animate-spin" /> Loading...
+                    <div className="flex items-center justify-center">
+                      <LoaderIcon className="animate-spin" /> &nbsp;Loading...
+                    </div>
                     </>
                   ) : (
                     "Data Tidak Tersedia"
@@ -275,7 +278,6 @@ function TableReportSystem({id,date}: Props) {
         </Table>
       </div>
       <div className="flex items-center space-x-2 py-4">
-        <div className="w-full text-center">Logsheet Sistem Wilis</div>
         <div className="flex justify-end space-x-2">
           <Button
             variant="outline"

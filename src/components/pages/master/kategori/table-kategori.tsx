@@ -257,13 +257,12 @@ function TableKategori({ setOpenForm }: Props) {
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                <TableCell colSpan={columns.length} className="h-24 w-full">
                   {loading ? (
                     <>
-                      <LoaderIcon className="animate-spin" /> Loading...
+                      <div className="flex items-center justify-center">
+                        <LoaderIcon className="animate-spin" /> &nbsp;Loading...
+                      </div>
                     </>
                   ) : (
                     "Data Tidak Tersedia"

@@ -284,18 +284,20 @@ function TablePelanggan({ setOpenForm }: Props) {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    {loading ? (
-                      <>
-                        <LoaderIcon className="animate-spin" /> Loading...
-                      </>
-                    ) : (
-                      "Data Tidak Tersedia"
-                    )}
-                  </TableCell>
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-24 w-full">
+                      {loading ? (
+                        <>
+                          <div className="flex items-center justify-center">
+                            <LoaderIcon className="animate-spin" />{" "}
+                            &nbsp;Loading...
+                          </div>
+                        </>
+                      ) : (
+                        "Data Tidak Tersedia"
+                      )}
+                    </TableCell>
+                  </TableRow>
                 </TableRow>
               )}
             </TableBody>

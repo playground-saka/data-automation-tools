@@ -53,6 +53,7 @@ function TableReportDifferent({ id, date }: Props) {
   return (
     <div className="w-full">
       <div className="rounded-md border">
+        <div className="w-full text-center mt-5">Tabel Data Selisih</div>
         <Table>
           <TableHeader>
             <TableRow>
@@ -144,10 +145,15 @@ function TableReportDifferent({ id, date }: Props) {
           {loading && (
             <TableBody>
               <TableRow>
-                <TableCell colSpan={10} className="h-24 text-center">
+                <TableCell
+                  colSpan={10}
+                  className="h-24 w-full"
+                >
                   {loading ? (
                     <>
-                      <LoaderIcon className="animate-spin" /> Loading...
+                      <div className="flex items-center justify-center">
+                        <LoaderIcon className="animate-spin" /> &nbsp;Loading...
+                      </div>
                     </>
                   ) : (
                     "Data Tidak Tersedia"
@@ -159,7 +165,6 @@ function TableReportDifferent({ id, date }: Props) {
         </Table>
       </div>
       <div className="flex items-center space-x-2 py-4">
-        <div className="w-full text-center">Selisih</div>
         <div className="flex justify-end space-x-2">
           <Button
             variant="outline"

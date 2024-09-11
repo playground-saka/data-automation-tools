@@ -254,7 +254,7 @@ function FormUpload(params:Props){
     const link = document.createElement("a");
     if (params.type == "sistem") {
       link.href = "/excel/LP PLTMH sistem.xlsx";
-      link.download = "logsheet-wilis.xlsx";
+      link.download = "logsheet-sistem.xlsx";
     } else {
       link.href = "/excel/LP PLTMH manual.xlsx";
       link.download = "logsheet-manual.xlsx";

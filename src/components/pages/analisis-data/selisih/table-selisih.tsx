@@ -12,7 +12,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, EyeOffIcon, FileDownIcon } from "lucide-react"
+import { ArrowUpDown, ChevronDown, EyeOffIcon, FileDownIcon, LoaderIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -272,7 +272,7 @@ function TableSelisih({}: Props) {
           }
           className="max-w-sm"
         />
-        <div className='ml-auto flex gap-2'>
+        <div className="ml-auto flex gap-2">
           <DatePicker
             selected={startDate}
             onChange={(date) => onChangeMonth(date)}
@@ -350,11 +350,16 @@ function TableSelisih({}: Props) {
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
+                <TableCell colSpan={columns.length} className="h-24 w-full">
+                  {loading ? (
+                    <>
+                      <div className="flex items-center justify-center">
+                        <LoaderIcon className="animate-spin" /> &nbsp;Loading...
+                      </div>
+                    </>
+                  ) : (
+                    "Data Tidak Tersedia"
+                  )}
                 </TableCell>
               </TableRow>
             )}

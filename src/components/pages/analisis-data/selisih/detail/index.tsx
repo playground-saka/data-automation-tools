@@ -14,13 +14,13 @@ function Index({ id }: Props) {
   
   return (
     <div className="flex flex-col gap-4 px-6 py-6 w-full h-fit bg-white rounded-xl border">
-      <div className="flex flex-col items-center justify-between">
+      <div className="flex flex-col">
         <div className="flex flex-col">
           <h1 className='mb-3'>Generate Analis Data</h1>
         </div>
+        <TableReportDifferent id={id} date={date}/>
         <TableReportSystem id={id} date={date}  />
         <TableReportManual id={id} date={date} />
-        <TableReportDifferent id={id} date={date}/>
       </div>
     </div>
   );

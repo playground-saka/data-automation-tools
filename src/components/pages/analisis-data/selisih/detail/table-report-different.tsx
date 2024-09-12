@@ -55,7 +55,7 @@ function TableReportDifferent({ id, date }: Props) {
       <div className="rounded-md border">
         <div className="w-full text-center mt-5">Tabel Data Selisih</div>
         <Table>
-          <TableHeader>
+          <TableHeader className="text-xs">
             <TableRow>
               <TableHead rowSpan={3} className="text-center">
                 Tanggal
@@ -82,7 +82,7 @@ function TableReportDifferent({ id, date }: Props) {
               <TableHead className="text-center">Selisih</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody className="text-xs">
             {data?.data.map(
               (row: Model.ReportDifferent.ReportDifferentData, index) => (
                 <TableRow key={index}>
@@ -99,7 +99,7 @@ function TableReportDifferent({ id, date }: Props) {
                     {row.selisihPowerP < 0 ? (
                       <span className="text-red-500">{row.selisihPowerP}</span>
                     ) : (
-                      <span className="text-green-400">
+                      <span className="text-green-700">
                         {row.selisihPowerP}
                       </span>
                     )}
@@ -116,7 +116,7 @@ function TableReportDifferent({ id, date }: Props) {
                         {row.selisihCurrentR}
                       </span>
                     ) : (
-                      <span className="text-green-400">
+                      <span className="text-green-700">
                         {row.selisihCurrentR}
                       </span>
                     )}
@@ -133,7 +133,7 @@ function TableReportDifferent({ id, date }: Props) {
                         {row.selisihVoltageRS}
                       </span>
                     ) : (
-                      <span className="text-green-400">
+                      <span className="text-green-700">
                         {row.selisihVoltageRS}
                       </span>
                     )}

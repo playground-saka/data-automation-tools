@@ -1,47 +1,47 @@
-export const formatDateTime = (dateTime: Date | string | undefined | null, format: string,utc=false): string => {
+export const formatDateTime = (dateTime: Date | string | undefined | null, format: string, utc = false): string => {
   if (typeof dateTime === "undefined") {
     return "";
   }
 
   const date = typeof dateTime === "string" ? new Date(dateTime) : dateTime;
-  
+
   if (date instanceof Date && utc) {
     date.setHours(date.getHours() - 7);
   }
-  
-  
-  // date.setHours(date.getHours() + 7);
+
   if (!(date instanceof Date) || isNaN(date.getTime())) {
     throw new RangeError(`Invalid time value: ${dateTime}`);
   }
 
-  const options: Intl.DateTimeFormatOptions = {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  };
+  const pad = (num: number) => String(num).padStart(2, '0');
+
+  const day = pad(date.getDate());
+  const month = new Intl.DateTimeFormat("id-ID", { month: "short" }).format(date); // Short month format (jun)
+  const year = date.getFullYear();
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  const seconds = pad(date.getSeconds());
+
+  let result = "";
 
   switch (format) {
     case "d-m-Y":
+      result = `${day} ${month} ${year}`;
       break;
     case "d-m-Y H:i:s":
-      options.hour = "2-digit";
-      options.minute = "2-digit";
-      options.second = "2-digit";
+      result = `${day} ${month} ${year} ${hours}:${minutes}:${seconds}`;
       break;
     case "m-Y":
-      delete options.day;
+      result = `${month}-${year}`;
       break;
     case "M":
-      options.month = "long";
-      delete options.day;
-      delete options.year;
+      result = new Intl.DateTimeFormat("id-ID", { month: "long" }).format(date);
       break;
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
 
-  return new Intl.DateTimeFormat("id-ID", options).format(date);
+  return result;
 };
 
 export const convertToYmd = (dateString: string) => {

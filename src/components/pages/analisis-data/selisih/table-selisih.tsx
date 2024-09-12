@@ -232,7 +232,8 @@ function TableSelisih({}: Props) {
   }, [currentPage, perPage, month]);
 
   const exportDifferentData = async (id:number,namaPelanggan:string,date:string):Promise<void> => {
-    await exportDifferentLogsheet(id, date)
+    const replaceDate = date.replace(/\s+/g, '');
+    await exportDifferentLogsheet(id, replaceDate)
     .then(async (res) => {
       const url = window.URL.createObjectURL(res);
       // Buat elemen anchor (a) untuk mengunduh file

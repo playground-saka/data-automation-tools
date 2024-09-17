@@ -1,9 +1,17 @@
 import axiosInstance from "@/lib/axios";
 
-export async function getFormulas(): Promise<
-  Model.Formula.FormulaData[]
-> {
-  const response = await axiosInstance.get("/formula");
+export async function getFormulas(
+  per_page = 10,
+  current_page = 1,
+  search = ""
+): Promise<Model.DataTable.ResponseDt<Model.Formula.FormulaData[]>> {
+  const response = await axiosInstance.get(`/formula`, {
+    params: {
+      page: current_page,
+      per_page: per_page,
+      search: search
+    }
+  });
   return response.data;
 }
 

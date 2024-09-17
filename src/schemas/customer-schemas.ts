@@ -13,8 +13,8 @@ export const schemaFormCustomer = z.object({
     required_error: "Category ID is required",
     invalid_type_error: "Category ID must be a string",
   }),
-  statusPelanggan: z.boolean({
+  statusPelanggan: z.string({
     required_error: "Status is required",
-    invalid_type_error: "Status must be a boolean",
-  }),
+    invalid_type_error: "Status must be a string",
+  })
 });

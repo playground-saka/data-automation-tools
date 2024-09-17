@@ -36,6 +36,7 @@ import { useRouter } from 'next/navigation'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { checkPermission } from '@/utils/permissions'
 
 
 type Props = {}
@@ -55,7 +56,7 @@ function TableLogsheet({}: Props) {
       },
       cell: ({ row }) => (
         <div className="text-xs">
-          {formatDateTime(row.getValue("date"), "m-Y",true)}
+          {formatDateTime(row.getValue("date"), "m-Y", true)}
         </div>
       ),
       enableHiding: false,
@@ -106,38 +107,44 @@ function TableLogsheet({}: Props) {
               >
                 <p className=" text-xs text-center"> Selesai di Upload</p>
               </div>
-              <div
-                className={`rounded-md px-2 py-1 w-fit text-xs flex items-center gap-1 bg-orange-300 cursor-pointer`}
-                onClick={() => {
-                  setLogSheet(row.original);
-                  setRollBackType("manual");
-                }}
-              >
-                <Undo2Icon size={17} /> Rollback
-              </div>
+              {checkPermission("master.logsheet.rollback") && (
+                <div
+                  className={`rounded-md px-2 py-1 w-fit text-xs flex items-center gap-1 bg-orange-300 cursor-pointer`}
+                  onClick={() => {
+                    setLogSheet(row.original);
+                    setRollBackType("manual");
+                  }}
+                >
+                  <Undo2Icon size={17} /> Rollback
+                </div>
+              )}
             </div>
           ) : (
-            <div
-              className={`
-              rounded-md px-2 py-1 w-fit
-              ${
-                row.getValue("logsheetManual")
-                  ? "bg-indigo-100 text-indigo-700"
-                  : "bg-gray-100 text-gray-500"
-              }
-            `}
-            >
+            <>
+              {checkPermission("master.logsheet.upload") && (
               <div
-                className="cursor-pointer text-xs"
-                onClick={() =>
-                  router.push(
-                    `/master/logsheet/upload/${row.original.id}/manual`
-                  )
+                className={`
+                rounded-md px-2 py-1 w-fit
+                ${
+                  row.getValue("logsheetManual")
+                    ? "bg-indigo-100 text-indigo-700"
+                    : "bg-gray-100 text-gray-500"
                 }
+              `}
               >
-                Belum di Upload
+                  <div
+                    className="cursor-pointer text-xs"
+                    onClick={() =>
+                      router.push(
+                        `/master/logsheet/upload/${row.original.id}/manual`
+                      )
+                    }
+                  >
+                    Belum di Upload
+                  </div>
               </div>
-            </div>
+              )}
+            </>
           )}
         </div>
       ),
@@ -165,39 +172,45 @@ function TableLogsheet({}: Props) {
               >
                 <p className=" text-xs text-center">Selesai di Upload</p>
               </div>
-              <div
-                className={`rounded-md px-2 py-1 w-fit text-xs flex items-center gap-1 bg-orange-300 cursor-pointer`}
-                onClick={() => {
-                  setLogSheet(row.original);
-                  setRollBackType("sistem");
-                }}
-              >
-                <Undo2Icon size={17} /> Rollback
-              </div>
+              {checkPermission("master.logsheet.rollback") && (
+                <div
+                  className={`rounded-md px-2 py-1 w-fit text-xs flex items-center gap-1 bg-orange-300 cursor-pointer`}
+                  onClick={() => {
+                    setLogSheet(row.original);
+                    setRollBackType("sistem");
+                  }}
+                >
+                  <Undo2Icon size={17} /> Rollback
+                </div>
+              )}
             </div>
           ) : (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div
-                    className={`text-xs rounded-md px-2 py-1 w-fit ${
-                      !row.original.logsheetManual ? "cursor-not-allowed" : "cursor-pointer"
-                    } ${
-                      row.getValue("logsheetSistem")
-                        ? "bg-indigo-100 text-indigo-700"
-                        : "bg-gray-100 text-gray-500"
-                    } `}
-                    onClick={
-                      row.original.logsheetManual
-                        ? () =>
-                            router.push(
-                              `/master/logsheet/upload/${row.original.id}/sistem`
-                            )
-                        : () => {}
-                    }
-                  >
-                    Belum di Upload
-                  </div>
+                  {checkPermission("master.logsheet.upload") && (
+                    <div
+                      className={`text-xs rounded-md px-2 py-1 w-fit ${
+                        !row.original.logsheetManual
+                          ? "cursor-not-allowed"
+                          : "cursor-pointer"
+                      } ${
+                        row.getValue("logsheetSistem")
+                          ? "bg-indigo-100 text-indigo-700"
+                          : "bg-gray-100 text-gray-500"
+                      } `}
+                      onClick={
+                        row.original.logsheetManual
+                          ? () =>
+                              router.push(
+                                `/master/logsheet/upload/${row.original.id}/sistem`
+                              )
+                          : () => {}
+                      }
+                    >
+                      Belum di Upload
+                    </div>
+                  )}
                 </TooltipTrigger>
                 {!row.original.logsheetManual && (
                   <TooltipContent>
@@ -212,6 +225,8 @@ function TableLogsheet({}: Props) {
       enableSorting: true,
     },
   ];
+
+  const [searchTerm, setSearchTerm] = useState("");
   const [data,setData] = useState<Model.DataTable.ResponseDt<Model.LogSheet.LogSheetData[]>>()
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [perPage, setPerPage] = useState(10);
@@ -233,7 +248,7 @@ function TableLogsheet({}: Props) {
 
   const fetchData = React.useCallback(async () => {
     setLoading(true);
-    await getLogsheet(currentPage, perPage, month)
+    await getLogsheet(currentPage, perPage, month, searchTerm)
     .then((res) => {
       setData(res);
       setTotalPages(res.total_pages); 
@@ -243,7 +258,7 @@ function TableLogsheet({}: Props) {
     }).finally(() => {
       setLoading(false);
     });
-  }, [currentPage, perPage, month]);
+  }, [currentPage, perPage, month, searchTerm]);
   
   useEffect(() => {
     fetchData();
@@ -279,7 +294,7 @@ function TableLogsheet({}: Props) {
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
-        <Input
+        {/* <Input
           placeholder="cari berdasarkan nama..."
           value={
             (table.getColumn("namaPelanggan")?.getFilterValue() as string) ?? ""
@@ -287,6 +302,15 @@ function TableLogsheet({}: Props) {
           onChange={(event) =>
             table.getColumn("namaPelanggan")?.setFilterValue(event.target.value)
           }
+          className="max-w-sm"
+        /> */}
+        <Input
+          placeholder="cari berdasarkan nama..."
+          value={searchTerm}
+          onChange={(event) => {
+            setSearchTerm(event.target.value);
+            setCurrentPage(1); // Reset to first page when searching
+          }}
           className="max-w-sm"
         />
         <div className="ml-auto gap-3 flex">
@@ -300,32 +324,6 @@ function TableLogsheet({}: Props) {
             shouldCloseOnSelect={true}
             customInput={<Input placeholder="Pilih Bulan" value={month} />}
           />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button type="button" variant="outline" className="ml-auto">
-                Filter Kolom <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column: any) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </div>
       <div className="rounded-md border">
@@ -367,7 +365,7 @@ function TableLogsheet({}: Props) {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 w-full">
+                <TableCell colSpan={columns.length} className="h-24 w-full text-center">
                   {loading ? (
                     <>
                       <div className="flex items-center justify-center">

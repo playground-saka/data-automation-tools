@@ -1,11 +1,15 @@
 import { z } from "zod";
 
-export const schemaFormUser = z
-  .object({
-    
+export const schemaFormUser = (isEditMode: boolean) => {
+  z.object({
     username: z.string({
       required_error: "Username lengkap is required",
       invalid_type_error: "Username lengkap must be a string",
+    }),
+    isActive: z.string().nullable(),
+    roleId: z.string({
+      required_error: "Role ID is required",
+      invalid_type_error: "Role ID must be a string",
     }),
     fullName: z.string({
       required_error: "Nama lengkap is required",
@@ -20,12 +24,19 @@ export const schemaFormUser = z
       .email({
         message: "Email must be a valid email",
       }),
-    password: z
-      .string({
-        required_error: "Kata sandi is required",
-        invalid_type_error: "Kata sandi must be a string",
-      }).nullable().refine((val) => val === null || val.length >= 8, {
-        message: "Kata sandi harus memiliki panjang minimal 8 karakter",
-        path: ["password"],
-      }),
-  })
+    password: isEditMode
+      ? z
+          .string()
+          .nullable()
+          .optional()
+      : z
+          .string({
+            required_error: "Kata sandi is required",
+            invalid_type_error: "Kata sandi must be a string",
+          })
+          .refine((val) => val === null || val.length >= 8, {
+            message: "Kata sandi harus memiliki panjang minimal 8 karakter",
+            path: ["password"],
+          }),
+  });
+}; 

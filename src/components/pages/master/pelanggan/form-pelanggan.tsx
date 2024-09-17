@@ -30,7 +30,7 @@ function FormPelanggan({setOpenForm}: Props) {
   type CustomerFormInputs = TypeOf<typeof schemaFormCustomer>;
   const [categories, setCategory] = useState<Model.Category.CategoryData[]>([]);
   const fetchDataCategory = async () =>
-    await getCategories().then((res) => {
+    await getCategories(1).then((res) => {
       setCategory(res);
     });
   useEffect(() => {
@@ -39,10 +39,16 @@ function FormPelanggan({setOpenForm}: Props) {
   return (
     <Formik<CustomerFormInputs>
       initialValues={{
-        pelangganId: pelanggan?.pelangganId ? pelanggan?.pelangganId.toString() : "",
+        pelangganId: pelanggan?.pelangganId
+          ? pelanggan?.pelangganId.toString()
+          : "",
         namaPelanggan: pelanggan?.namaPelanggan ? pelanggan?.namaPelanggan : "",
-        kategoriId: pelanggan?.kategori ? (pelanggan.kategori.id).toString() : "",
-        statusPelanggan: true,
+        kategoriId: pelanggan?.kategori ? pelanggan.kategori.id.toString() : "",
+        statusPelanggan: pelanggan
+          ? pelanggan?.statusPelanggan
+            ? "1"
+            : "0"
+          : "",
       }}
       onSubmit={async (values) => {
         if (!pelanggan) {
@@ -63,21 +69,22 @@ function FormPelanggan({setOpenForm}: Props) {
             })
             .finally(() => {});
         } else {
-          await putCustomer(pelanggan.id,values)
-          .then((res) => {
-            setOpenForm(false);
-            triggerFetchData();
-            toast({
-              title: "Success",
-              description: "Data berhasil disimpan",
-            });
-          }).catch((err) => {
-            toast({
-              title: "Error",
-              description: err.response.data.error,
-            });
-          })
-          .finally(() => {});
+          await putCustomer(pelanggan.id, values)
+            .then((res) => {
+              setOpenForm(false);
+              triggerFetchData();
+              toast({
+                title: "Success",
+                description: "Data berhasil disimpan",
+              });
+            })
+            .catch((err) => {
+              toast({
+                title: "Error",
+                description: err.response.data.error,
+              });
+            })
+            .finally(() => {});
         }
       }}
       validateOnChange={true}
@@ -160,10 +167,49 @@ function FormPelanggan({setOpenForm}: Props) {
                 />
               )}
             </div>
+            <div className="grid items-center gap-2">
+              <Label htmlFor="isActive" className="text-xs">
+                Status
+              </Label>
+              <Select
+                name="statusPelanggan"
+                onValueChange={(value) =>
+                  setFieldValue("statusPelanggan", value)
+                }
+                value={values.statusPelanggan ?? ""}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Pilih Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem key={"active"} value={"1"}>
+                      Aktif
+                    </SelectItem>
+                    <SelectItem key={"nonactive"} value={"0"}>
+                      Non Aktif
+                    </SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              {touched.statusPelanggan && errors.statusPelanggan && (
+                <ErrorMessage
+                  name="statusPelanggan"
+                  className="w-full text-red-400 text-xs"
+                  component="div"
+                />
+              )}
+            </div>
           </div>
           <SheetFooter>
             <div className="flex flex-row gap-2 justify-end">
-              <Button type="button" onClick={() => {setOpenForm(false);setPelanggan(null)}}>
+              <Button
+                type="button"
+                onClick={() => {
+                  setOpenForm(false);
+                  setPelanggan(null);
+                }}
+              >
                 Batal
               </Button>
               <Button

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from "react";
 
 import {
   ColumnDef,
@@ -11,17 +11,23 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, EyeOffIcon, FileDownIcon, LoaderIcon } from "lucide-react"
+} from "@tanstack/react-table";
+import {
+  ArrowUpDown,
+  ChevronDown,
+  EyeOffIcon,
+  FileDownIcon,
+  LoaderIcon,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -29,42 +35,45 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { EyeIcon } from '@heroicons/react/24/outline'
-import Link from 'next/link'
-import { exportDifferentLogsheet, getLogsheet } from '@/app/api/logsheet'
-import { formatDateTime } from '@/utils/formatter'
-import { toast } from '@/components/ui/use-toast'
-import DatePicker from 'react-datepicker'
+} from "@/components/ui/table";
+import { EyeIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { exportDifferentLogsheet, getLogsheet } from "@/app/api/logsheet";
+import { formatDateTime } from "@/utils/formatter";
+import { toast } from "@/components/ui/use-toast";
+import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { checkPermission } from "@/utils/permissions";
 
+import { LogSheetontext } from "@/components/providers/LogSheetProvider";
 
-type Props = {}
-
+type Props = {};
 
 function TableSelisih({}: Props) {
-  const [data,setData] = React.useState<Model.DataTable.ResponseDt<Model.LogSheet.LogSheetData[]>>()
+  const [data, setData] =
+    React.useState<Model.DataTable.ResponseDt<Model.LogSheet.LogSheetData[]>>();
   const [loading, setLoading] = React.useState(false);
+  const { triggerFetch, setLogSheet, setRollBackType } =
+    useContext(LogSheetontext);
   const [currentPage, setCurrentPage] = React.useState<number>(1);
   const [perPage, setPerPage] = React.useState(10);
   const [totalPages, setTotalPages] = React.useState(0);
-  const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
-  )
+  );
   const columns: ColumnDef<Model.LogSheet.LogSheetData>[] = [
     {
       id: "date",
       accessorKey: "date",
       header: () => {
         return (
-          <div className="flex flex-row gap-1 items-center text-xs">
+          <div className='flex flex-row gap-1 items-center text-xs'>
             Tanggal
           </div>
         );
       },
       cell: ({ row }) => (
-        <div className="text-xs">
+        <div className='text-xs'>
           {formatDateTime(row.getValue("date"), "m-Y")}
         </div>
       ),
@@ -80,16 +89,16 @@ function TableSelisih({}: Props) {
       header: ({ column }) => {
         return (
           <div
-            className="flex flex-row gap-1 items-center cursor-pointer text-xs"
+            className='flex flex-row gap-1 items-center cursor-pointer text-xs'
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Nama Pelanggan
-            <ArrowUpDown className="h-3 w-3" />
+            <ArrowUpDown className='h-3 w-3' />
           </div>
         );
       },
       cell: ({ row }: any) => {
-        return <div className="text-xs">{row.getValue("namaPelanggan")}</div>;
+        return <div className='text-xs'>{row.getValue("namaPelanggan")}</div>;
       },
       enableSorting: true,
       enableHiding: false,
@@ -102,11 +111,11 @@ function TableSelisih({}: Props) {
       header: ({ column }) => {
         return (
           <div
-            className="flex flex-row gap-1 items-center cursor-pointer text-xs"
+            className='flex flex-row gap-1 items-center cursor-pointer text-xs'
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Status
-            <ArrowUpDown className="h-3 w-3" />
+            <ArrowUpDown className='h-3 w-3' />
           </div>
         );
       },
@@ -135,22 +144,27 @@ function TableSelisih({}: Props) {
           row.original.logsheetManual && row.original.logsheetSistem;
         return (
           <>
-            <div className="flex flex-row">
-              {status ? (
-                <Link
-                  href={`/analisis-data/selisih/${pelanggan_id}?date=${row.original.month}-${row.original.years}`}
-                  className="p-2 w-fit flex justify-end cursor-pointer"
-                >
-                  <EyeIcon className="w-4 h-4" />
-                </Link>
-              ) : (
-                <div className="p-2 w-fit flex justify-end">
-                  <EyeOffIcon className="w-4 h-4 text-stone-800/75" />
-                </div>
+            <div className='flex flex-row'>
+              {checkPermission("analisis_data.selisish.view") && (
+                <>
+                  {status ? (
+                    <Link
+                      href={`/analisis-data/selisih/${pelanggan_id}?date=${row.original.month}-${row.original.years}`}
+                      className='p-2 w-fit flex justify-end cursor-pointer'
+                    >
+                      <EyeIcon className='w-4 h-4' />
+                    </Link>
+                  ) : (
+                    <div className='p-2 w-fit flex justify-end'>
+                      <EyeOffIcon className='w-4 h-4 text-stone-800/75' />
+                    </div>
+                  )}
+                </>
               )}
-              {(status) && (
+
+              {checkPermission("analisis_data.selisish.export") && status && (
                 <div
-                  className="p-2 w-fit flex justify-end cursor-pointer"
+                  className='p-2 w-fit flex justify-end cursor-pointer'
                   onClick={() => {
                     exportDifferentData(
                       row.original.pelanggan.id,
@@ -159,7 +173,7 @@ function TableSelisih({}: Props) {
                     );
                   }}
                 >
-                  <FileDownIcon className="w-4 h-4 text-stone-800/75" />
+                  <FileDownIcon className='w-4 h-4 text-stone-800/75' />
                 </div>
               )}
             </div>
@@ -168,10 +182,12 @@ function TableSelisih({}: Props) {
       },
     },
   ];
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
+  const [searchTerm, setSearchTerm] = useState("");
 
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = React.useState({});
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [month, setMonth] = useState<string>("");
 
@@ -187,7 +203,6 @@ function TableSelisih({}: Props) {
     let formattedDate = `${month}-${year}`;
     setMonth(formattedDate);
   };
-
 
   const table = useReactTable({
     data: data?.data ?? [],
@@ -207,63 +222,61 @@ function TableSelisih({}: Props) {
       rowSelection,
     },
   });
-  useEffect(() => {
-    let isMounted = true
-    const fetchDataAsync = async () => {
-      setLoading(true);
-      try {
-        const res = await getLogsheet(currentPage, perPage,month)
-        if (isMounted) {
-          setData(res);
-          setTotalPages(res.total_pages);
-        }
-      } catch (err) {
-        console.log(err);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    }
-    fetchDataAsync()
-    return () => {
-      isMounted = false
-    }
-  }, [currentPage, perPage, month]);
 
-  const exportDifferentData = async (id:number,namaPelanggan:string,date:string):Promise<void> => {
-    const replaceDate = date.replace(/\s+/g, '');
-    await exportDifferentLogsheet(id, replaceDate)
-    .then(async (res) => {
-      const url = window.URL.createObjectURL(res);
-      // Buat elemen anchor (a) untuk mengunduh file
-      const a = document.createElement("a");
-      a.href = url;
-
-      // Tentukan nama file yang akan diunduh
-      a.download = `Laporan Selisih Logsheet ${namaPelanggan} (${date}).xlsx`;
-      document.body.appendChild(a);
-      a.click();
-
-      // Hapus elemen anchor setelah selesai
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-    })
-    .catch((err) => {
-      toast({
-        title: "Error",
-        description: err.response.data.message,
+  const fetchData = React.useCallback(async () => {
+    setLoading(true);
+    await getLogsheet(currentPage, perPage, month, searchTerm)
+      .then((res) => {
+        setData(res);
+        setTotalPages(res.total_pages);
       })
-    })
-    .finally(() => {
-      
-    });
-  }
-  
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [currentPage, perPage, month, searchTerm]);
+
+  useEffect(() => {
+    fetchData();
+  }, [triggerFetch, fetchData, currentPage, perPage, month]);
+
+  const exportDifferentData = async (
+    id: number,
+    namaPelanggan: string,
+    date: string
+  ): Promise<void> => {
+    const replaceDate = date.replace(/\s+/g, "");
+    await exportDifferentLogsheet(id, replaceDate)
+      .then(async (res) => {
+        const url = window.URL.createObjectURL(res);
+        // Buat elemen anchor (a) untuk mengunduh file
+        const a = document.createElement("a");
+        a.href = url;
+
+        // Tentukan nama file yang akan diunduh
+        a.download = `Laporan Selisih Logsheet ${namaPelanggan} (${date}).xlsx`;
+        document.body.appendChild(a);
+        a.click();
+
+        // Hapus elemen anchor setelah selesai
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      })
+      .catch((err) => {
+        toast({
+          title: "Error",
+          description: err.response.data.message,
+        });
+      })
+      .finally(() => {});
+  };
+
   return (
-    <div className="w-full">
-      <div className="flex items-center py-4">
-        <Input
+    <div className='w-full'>
+      <div className='flex items-center py-4'>
+        {/* <Input
           placeholder="cari berdasarkan nama..."
           value={
             (table.getColumn("namaPelanggan")?.getFilterValue() as string) ?? ""
@@ -272,25 +285,34 @@ function TableSelisih({}: Props) {
             table.getColumn("namaPelanggan")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
+        /> */}
+        <Input
+          placeholder='cari berdasarkan nama...'
+          value={searchTerm}
+          onChange={(event) => {
+            setSearchTerm(event.target.value);
+            setCurrentPage(1); // Reset to first page when searching
+          }}
+          className='max-w-sm'
         />
-        <div className="ml-auto flex gap-2">
+        <div className='ml-auto flex gap-2'>
           <DatePicker
             selected={startDate}
             onChange={(date) => onChangeMonth(date)}
-            dateFormat="MM-yyyy"
+            dateFormat='MM-yyyy'
             showMonthYearPicker
             showFullMonthYearPicker
-            placeholderText="Select Month and Year"
+            placeholderText='Select Month and Year'
             shouldCloseOnSelect={true}
-            customInput={<Input placeholder="Pilih Bulan" value={month} />}
+            customInput={<Input placeholder='Pilih Bulan' value={month} />}
           />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Filter Kolom <ChevronDown className="ml-2 h-4 w-4" />
+              <Button variant='outline' className='ml-auto'>
+                Filter Kolom <ChevronDown className='ml-2 h-4 w-4' />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align='end'>
               {table
                 .getAllColumns()
                 .filter((column) => column.getCanHide())
@@ -298,7 +320,7 @@ function TableSelisih({}: Props) {
                   return (
                     <DropdownMenuCheckboxItem
                       key={column.id}
-                      className="capitalize"
+                      className='capitalize'
                       checked={column.getIsVisible()}
                       onCheckedChange={(value) =>
                         column.toggleVisibility(!!value)
@@ -312,7 +334,7 @@ function TableSelisih({}: Props) {
           </DropdownMenu>
         </div>
       </div>
-      <div className="rounded-md border">
+      <div className='rounded-md border'>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -351,11 +373,14 @@ function TableSelisih({}: Props) {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 w-full">
+                <TableCell
+                  colSpan={columns.length}
+                  className='h-24 w-full text-center'
+                >
                   {loading ? (
                     <>
-                      <div className="flex items-center justify-center">
-                        <LoaderIcon className="animate-spin" /> &nbsp;Loading...
+                      <div className='flex items-center justify-center'>
+                        <LoaderIcon className='animate-spin' /> &nbsp;Loading...
                       </div>
                     </>
                   ) : (
@@ -367,21 +392,21 @@ function TableSelisih({}: Props) {
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="space-x-2">
+      <div className='flex items-center justify-end space-x-2 py-4'>
+        <div className='space-x-2'>
           <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            variant='outline'
+            size='sm'
+            onClick={() => setCurrentPage((prev) => prev - 1)}
+            disabled={currentPage <= 1}
           >
             Sebelumnya
           </Button>
           <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            variant='outline'
+            size='sm'
+            onClick={() => setCurrentPage((prev) => prev + 1)}
+            disabled={currentPage >= totalPages}
           >
             Selanjutnya
           </Button>
@@ -391,4 +416,4 @@ function TableSelisih({}: Props) {
   );
 }
 
-export default TableSelisih
+export default TableSelisih;

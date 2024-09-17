@@ -3,39 +3,38 @@ import React, { useContext, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {  postCategory, putCategory } from "@/app/api/category";
 import { SheetFooter } from "@/components/ui/sheet";
-import { KategoriContext } from "../../../providers/KategoriProvider";
+import { RoleContext } from "../../../providers/RoleProvider";
 import { TypeOf } from "zod";
 import { Formik,ErrorMessage, Form } from 'formik';
-import { schemaFormcategory } from "@/schemas/category-schemas";
 import { toFormikValidationSchema } from "zod-formik-adapter";
 import { toast } from "@/components/ui/use-toast";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { schemaFormRole } from "@/schemas/role-schemas";
+import { postRole, putRole } from "@/app/api/role";
 
 type Props = {
   setOpenForm: React.Dispatch<React.SetStateAction<boolean>>
 };
-function FormKategori({setOpenForm}: Props) {
-  const { triggerFetchData,kategori,setKategori } = useContext(KategoriContext);
+function FormRole({setOpenForm}: Props) {
+  const { triggerFetchData,role,setRole } = useContext(RoleContext);
   const [loading, setLoading] = useState(false);
-  type CategoryFormInputs = TypeOf<typeof schemaFormcategory>;
+  type RoleFormInputs = TypeOf<typeof schemaFormRole>;
   return (
-    <Formik<CategoryFormInputs>
+    <Formik<RoleFormInputs>
       initialValues={{
-        namaKategori: kategori ? kategori?.namaKategori : "",
-        statusKategori: kategori ? (kategori?.statusKategori ? "1" : "0") : "",
+        roleName: role ? role?.roleName : "",
+        description: role ? role?.description : "",
       }}
       onSubmit={async (values) => {
         setLoading(true);
-        if (!kategori) {
-          await postCategory(values)
+        if (!role) {
+          await postRole(values)
             .then((res) => {
               setOpenForm(false);
               triggerFetchData();
               toast({
                 title: "Sukses",
-                description: "Kategori berhasil ditambahkan",
+                description: "Role berhasil ditambahkan",
                 duration: 3000,
               });
             })
@@ -50,14 +49,14 @@ function FormKategori({setOpenForm}: Props) {
               setLoading(false);
             });
         } else {
-          await putCategory(kategori.id, values)
+          await putRole(role.id, values)
             .then((res) => {
               setOpenForm(false);
-              setKategori(null);
+              setRole(null);
               triggerFetchData();
               toast({
                 title: "Sukses",
-                description: "Kategori berhasil diubah",
+                description: "Role berhasil diubah",
                 duration: 3000,
               });
             })
@@ -74,59 +73,46 @@ function FormKategori({setOpenForm}: Props) {
         }
       }}
       validateOnChange={true}
-      validationSchema={toFormikValidationSchema(schemaFormcategory)}
+      validationSchema={toFormikValidationSchema(schemaFormRole)}
     >
       {({ setFieldValue, values, touched, isValid, errors }) => (
         <Form className="flex flex-col gap-6">
           <div className="grid gap-4 py-4">
             <div className="grid items-center gap-2">
-              <Label htmlFor="namaKategori" className="text-xs">
-                Nama Kategori
+              <Label htmlFor="roleName" className="text-xs">
+                Nama Role
               </Label>
               <Input
-                id="namaKategori"
+                id="roleName"
                 type="text"
                 name="name"
-                value={values.namaKategori}
-                onChange={(e) => setFieldValue("namaKategori", e.target.value)}
+                value={values.roleName}
+                onChange={(e) => setFieldValue("roleName", e.target.value)}
                 className="col-span-3"
               />
-              {touched.namaKategori && errors.namaKategori && (
+              {touched.roleName && errors.roleName && (
                 <ErrorMessage
-                  name="name"
+                  name="roleName"
                   className="w-full text-red-400 text-xs"
                   component="div"
                 />
               )}
             </div>
             <div className="grid items-center gap-2">
-              <Label htmlFor="isActive" className="text-xs">
-                Status
+              <Label htmlFor="description" className="text-xs">
+                Deskripsi
               </Label>
-              <Select
-                name="statusKategori"
-                onValueChange={(value) =>
-                  setFieldValue("statusKategori", value)
-                }
-                value={values.statusKategori ?? ""}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Pilih Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem key={"active"} value={"1"}>
-                      Aktif
-                    </SelectItem>
-                    <SelectItem key={"nonactive"} value={"0"}>
-                      Non Aktif
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              {touched.statusKategori && errors.statusKategori && (
+              <Input
+                id="description"
+                type="text"
+                name="name"
+                value={values.description || ""}
+                onChange={(e) => setFieldValue("description", e.target.value)}
+                className="col-span-3"
+              />
+              {touched.description && errors.description && (
                 <ErrorMessage
-                  name="statusKategori"
+                  name="description"
                   className="w-full text-red-400 text-xs"
                   component="div"
                 />
@@ -141,7 +127,7 @@ function FormKategori({setOpenForm}: Props) {
                 isLoading={loading}
                 onClick={() => {
                   setOpenForm(false);
-                  setKategori(null);
+                  setRole(null);
                 }}
               >
                 Batal
@@ -162,4 +148,4 @@ function FormKategori({setOpenForm}: Props) {
   );
 }
 
-export default FormKategori;
+export default FormRole;

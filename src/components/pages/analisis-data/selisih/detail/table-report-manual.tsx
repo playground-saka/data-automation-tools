@@ -286,7 +286,7 @@ function TableReportManual({date,id}: Props) {
   return (
     <div className="w-full">
       <div className="rounded-md border">
-        <div className="w-full text-center mt-5">Logsheet Manual</div>
+        <div className="w-full text-center p-5">Logsheet Manual</div>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

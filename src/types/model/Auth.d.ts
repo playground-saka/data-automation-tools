@@ -11,6 +11,8 @@ declare namespace Model {
     interface AuthData {
       user: User;
       token: string;
+      permissions: string[];
+      menus:Menu.MenuData[]
     }
   }
 }

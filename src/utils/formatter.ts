@@ -54,3 +54,7 @@ export const convertToYmd = (dateString: string) => {
   return formattedDate;
 };
 
+export const toTitleCase = (str: string | undefined | null) => {
+  if (!str) return '';  // Return an empty string if str is undefined or null
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 import {
   ColumnDef,
@@ -12,7 +12,13 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, LoaderIcon, Trash2Icon } from "lucide-react";
+import {
+  ChevronDown,
+  LoaderIcon,
+  PencilIcon,
+  Settings2Icon,
+  Trash2Icon,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -30,101 +36,123 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { KategoriContext } from "../../../providers/KategoriProvider";
-import { getCategories } from "@/app/api/category";
-import { toast } from "@/components/ui/use-toast";
-import { PencilIcon } from "@heroicons/react/24/outline";
+import { EyeIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { formatDateTime } from "@/utils/formatter";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { checkPermission } from "@/utils/permissions";
+import { getRoles } from "@/app/api/role";
+import { RoleContext } from "@/components/providers/RoleProvider";
 
 type Props = {
   setOpenForm: React.Dispatch<React.SetStateAction<boolean>>;
 };
-function TableKategori({ setOpenForm }: Props) {
-  const { triggerFetch, setKategori, setOpenDialogDelete } = useContext(KategoriContext);
-  const columns: ColumnDef<Model.Category.CategoryData>[] = [
+
+function TableRole({ setOpenForm }: Props) {
+  const { triggerFetch, setRole, setOpenDialogDelete, setOpenDialogSettingRole } =
+    useContext(RoleContext);
+  const [data, setData] =
+    React.useState<Model.DataTable.ResponseDt<Model.Role.RoleData[]>>();
+  const [loading, setLoading] = React.useState(false);
+  const [currentPage, setCurrentPage] = React.useState<number>(1);
+  const [perPage, setPerPage] = React.useState(10);
+  const [totalPages, setTotalPages] = React.useState(0);
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
+  const columns: ColumnDef<Model.Role.RoleData>[] = [
     {
-      id: "namaKategori",
-      accessorKey: "namaKategori",
-      header: ({ column }) => {
+      id: "roleName",
+      accessorKey: "roleName",
+      header: () => {
         return (
-          <div
-            className="flex flex-row gap-1 items-center cursor-pointer text-xs"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Nama Kategori
-            <ArrowUpDown className="h-3 w-3" />
-          </div>
+          <div className="flex flex-row gap-1 items-center text-xs">Role</div>
         );
       },
-      cell: ({ row }: any) => {
-        return <div className="text-xs">{row.getValue("namaKategori")}</div>;
-      },
-      enableSorting: true,
+      cell: ({ row }) => (
+        <div className="text-xs">{row.getValue("roleName")}</div>
+      ),
       enableHiding: false,
     },
     {
-      id: "status",
-      accessorKey: "status",
-      accessorFn: (row) => row.statusKategori,
-      header: ({ column }) => {
+      id: "description",
+      accessorKey: "description",
+      header: () => {
         return (
-          <div
-            className="flex flex-row gap-1 items-center cursor-pointer text-xs"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Status
-            <ArrowUpDown className="h-3 w-3" />
+          <div className="flex flex-row gap-1 items-center text-xs">
+            Deskripsi
           </div>
         );
       },
-      cell: ({ row }: any) => {
-        const status = row.getValue("status");
+      cell: ({ row }) => (
+        <div className="text-xs">{row.getValue("description")}</div>
+      ),
+      enableHiding: false,
+    },
+    {
+      id: "createdAt",
+      accessorKey: "createdAt",
+      header: () => {
         return (
-          <div
-            className={`
-            rounded-md px-2 py-1 w-fit
-            ${
-              status
-                ? "bg-indigo-100 text-indigo-700"
-                : "bg-gray-100 text-gray-500"
-            }
-          `}
-          >
-            <p className="capitalize text-xs text-center">
-              {status ? "Aktif" : "Tidak Aktif"}
-            </p>
+          <div className="flex flex-row gap-1 items-center text-xs">
+            Created At
           </div>
         );
       },
-      enableSorting: true,
+      cell: ({ row }) => (
+        <div className="text-xs">
+          {formatDateTime(row.getValue("createdAt"), "d-m-Y")}
+        </div>
+      ),
+      enableHiding: false,
     },
     {
       id: "actions",
       enableHiding: false,
+      header: () => {
+        return (
+          <div className="flex flex-row gap-1 items-center text-xs">Aksi</div>
+        );
+      },
       cell: ({ row }) => {
         return (
           <>
             <div className="flex flex-row">
-              {checkPermission("master.kategori.update") && (
-                <div
-                  onClick={() => {
-                    setKategori(row.original);
-                    setOpenForm(true);
-                  }}
-                  className="p-2 w-fit flex justify-end cursor-pointer"
-                >
-                  <PencilIcon className="w-4 h-4" />
-                </div>
+              {checkPermission("acl.role.update") && (
+                <>
+                  <div
+                    onClick={() => {
+                      setRole(row.original);
+                      setOpenForm(true);
+                    }}
+                    className="p-2 w-fit flex justify-end cursor-pointer"
+                  >
+                    <PencilIcon className="w-4 h-4" />
+                  </div>
+                </>
               )}
-              {checkPermission("master.kategori.delete") && (
+              {checkPermission("acl.role.delete") && (
                 <div
                   onClick={() => {
-                    setKategori(row.original);
+                    setRole(row.original);
                     setOpenDialogDelete(true);
                   }}
                   className="p-2 w-fit flex justify-end cursor-pointer text-red-500"
                 >
                   <Trash2Icon className="w-4 h-4" />
+                </div>
+              )}
+              {checkPermission("acl.role.setting") && (
+                <div
+                  onClick={() => {
+                    setRole(row.original);
+                    setOpenDialogSettingRole(true);
+                  }}
+                  className="p-2 w-fit flex justify-end cursor-pointer text-orange-500"
+                >
+                  <Settings2Icon className="w-4 h-4" />
                 </div>
               )}
             </div>
@@ -133,39 +161,12 @@ function TableKategori({ setOpenForm }: Props) {
       },
     },
   ];
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
-  const [data, setData] = React.useState<Model.Category.CategoryData[]>([]);
-  const [loading, setLoading] = React.useState(false);
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
-  const fetchData = async () => {
-    setLoading(true);
-    await getCategories()
-      .then((res) => {
-        setData(res);
-      })
-      .catch((err) => {
-        toast({
-          title: "Error",
-          description: err.response.data.message,
-        });
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [triggerFetch]);
-
   const table = useReactTable({
-    data,
+    data: data?.data ?? [],
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -182,17 +183,40 @@ function TableKategori({ setOpenForm }: Props) {
       rowSelection,
     },
   });
+  useEffect(() => {
+    let isMounted = true;
+    const fetchDataAsync = async () => {
+      setLoading(true);
+      try {
+        const res = await getRoles();
+        if (isMounted) {
+          setData(res);
+          setTotalPages(res.total_pages);
+        }
+      } catch (err) {
+        console.log(err);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+    fetchDataAsync();
+    return () => {
+      isMounted = false;
+    };
+  }, [triggerFetch,currentPage, perPage]);
 
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
         <Input
-          placeholder="cari berdasarkan nama..."
+          placeholder="cari berdasarkan role..."
           value={
-            (table.getColumn("namaKategori")?.getFilterValue() as string) ?? ""
+            (table.getColumn("roleName")?.getFilterValue() as string) ?? ""
           }
           onChange={(event) =>
-            table.getColumn("namaKategori")?.setFilterValue(event.target.value)
+            table.getColumn("roleName")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
@@ -236,7 +260,10 @@ function TableKategori({ setOpenForm }: Props) {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 w-full text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 w-full text-center"
+                >
                   {loading ? (
                     <>
                       <div className="flex items-center justify-center">
@@ -255,7 +282,6 @@ function TableKategori({ setOpenForm }: Props) {
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="space-x-2">
           <Button
-            type="button"
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
@@ -264,7 +290,6 @@ function TableKategori({ setOpenForm }: Props) {
             Sebelumnya
           </Button>
           <Button
-            type="button"
             variant="outline"
             size="sm"
             onClick={() => table.nextPage()}
@@ -278,4 +303,4 @@ function TableKategori({ setOpenForm }: Props) {
   );
 }
 
-export default TableKategori;
+export default TableRole;

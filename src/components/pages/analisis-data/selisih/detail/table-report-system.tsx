@@ -219,7 +219,7 @@ function TableReportSystem({id,date}: Props) {
   return (
     <div className="w-full">
       <div className="rounded-md border">
-        <div className="w-full text-center mt-5">Logsheet Sistem Wilis</div>
+        <div className="w-full text-center p-5">Logsheet Sistem Wilis</div>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

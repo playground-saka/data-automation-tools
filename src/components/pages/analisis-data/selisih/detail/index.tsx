@@ -1,8 +1,9 @@
 import { usePathname, useSearchParams } from 'next/navigation'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import TableReportSystem from './table-report-system';
 import TableReportManual from './table-report-manual';
 import TableReportDifferent from './table-report-different';
+import { detailCustomer } from '@/app/api/customer';
 
 type Props = {
   id:number

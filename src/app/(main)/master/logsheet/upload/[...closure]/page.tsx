@@ -16,13 +16,15 @@ function Page () {
   const [codePelanggan, setCodePelanggan] = useState<any>("");
   const [date, setDate] = useState<string>("");
   const [type, setType] = useState<string>("");
+  const [name, setName] = useState<string>("");
 
   const fetchDetailLogSheet = async (id:string) =>{
     await detailLogsheet(id)
     .then((res) => {
       setPelangganId(res.pelanggan.id);
       setCodePelanggan(res.pelanggan.pelangganId);
-      setDate(formatDateTime(res.date,"m-Y"))
+      setDate(formatDateTime(res.date,"m-Y"));
+      setName(res.pelanggan.namaPelanggan);
     })
     .catch((err) => {
       console.log(err);
@@ -41,13 +43,14 @@ function Page () {
         router.push("/master/logsheet");
       }
     }
+
   }, [params, router]);
   
   return (
     <section className="w-full h-full flex flex-col gap-6 px-6 py-6 pt-12 pb-20">
       <div className="flex flex-row items-baseline justify-between">
-        <h1 className="text-3xl">
-          {type == "manual" ? "Upload File Manual" : "Upload File Sistem"}
+        <h1 className="text-xl">
+          {type == "manual" ? `Upload File Manual - ${name} ( ${date} )` : `Upload File Sistem - ${name} ( ${date} )`}
         </h1>
         <Breadcrumbs />
       </div>

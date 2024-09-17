@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from 
 import FormLogSheet from './form-logsheet'
 import { LogSheetProvider } from '../../../providers/LogSheetProvider'
 import DialogRollBackLogSheet from './rollback-logsheet'
+import { checkPermission } from '@/utils/permissions'
 
 type Props = {}
 
@@ -17,13 +18,15 @@ function Index({}: Props) {
     <LogSheetProvider>
       <Sheet open={openForm}>
         <div className="flex flex-col gap-4 px-6 py-6 w-full h-fit bg-white rounded-xl border">
-          <SheetContent>
-            <SheetTitle>Form Logsheet</SheetTitle>
-            <SheetDescription>
-              Isi detail di bawah ini di setiap langkah nya.
-            </SheetDescription>
-            <FormLogSheet setOpenForm={setOpenForm}/>
-          </SheetContent>
+          {checkPermission('master.logsheet.generate') && (
+            <SheetContent>
+              <SheetTitle>Form Logsheet</SheetTitle>
+              <SheetDescription>
+                Isi detail di bawah ini di setiap langkah nya.
+              </SheetDescription>
+              <FormLogSheet setOpenForm={setOpenForm}/>
+            </SheetContent>
+          )}
           <div className="flex flex-row items-center justify-between">
             <div className="flex flex-col">
               <h1>Daftar Logsheet</h1>
@@ -31,15 +34,17 @@ function Index({}: Props) {
                 Logsheet yang mencakup data manual dan data sistem untuk pemantauan dan pelaporan
               </p>
             </div>
-            <SheetTrigger asChild>
-              <Button type='button' onClick={() => setOpenForm(true)} className="flex flex-row gap-2 items-center">
-                <ArrowRightEndOnRectangleIcon className="w-4 h-4" />
-                Generate bulan baru
-              </Button>
-            </SheetTrigger>
+            {checkPermission('master.logsheet.generate') && (
+              <SheetTrigger asChild>
+                <Button type='button' onClick={() => setOpenForm(true)} className="flex flex-row gap-2 items-center">
+                  <ArrowRightEndOnRectangleIcon className="w-4 h-4" />
+                  Generate bulan baru
+                </Button>
+              </SheetTrigger>
+              )}
           </div>
           <TableLogsheet />
-          <DialogRollBackLogSheet/>
+          {checkPermission('master.logsheet.rollback') && <DialogRollBackLogSheet />}
         </div>
       </Sheet>
     </LogSheetProvider>

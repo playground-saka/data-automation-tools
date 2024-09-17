@@ -6,9 +6,10 @@ declare namespace Model {
       username: string;
       email: string;
       password: string;
-      isActive: true;
+      isActive: boolean;
       createdAt: Date;
       updatedAt: Date;
+      role: Model.Role.RoleData[];
     }
   }
 }

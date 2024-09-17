@@ -164,17 +164,22 @@ function TablePelanggan({ setOpenForm }: Props) {
   const [data, setData] =
     useState<Model.DataTable.ResponseDt<Model.Customer.CustomerData[]>>();
 
+  const [searchTerm, setSearchTerm] = useState("");
+
   const fetchDataCustomer = React.useCallback(async () => {
     setLoading(true);
-    await getCustomers(perPage, currentPage)
+    await getCustomers(perPage, currentPage, searchTerm)
       .then((res) => {
         setData(res);
       })
-      .catch((err) => {})
+      .catch((err) => {
+        console.error("Error fetching customers:", err);
+      })
       .finally(() => {
         setLoading(false);
       });
-  }, [currentPage, perPage]);
+  }, [currentPage, perPage, searchTerm]);
+
   useEffect(() => {
     fetchDataCustomer();
   }, [fetchDataCustomer, triggerFetch]);
@@ -203,43 +208,13 @@ function TablePelanggan({ setOpenForm }: Props) {
         <div className="flex items-center py-4">
           <Input
             placeholder="cari berdasarkan nama..."
-            value={
-              (table.getColumn("namaPelanggan")?.getFilterValue() as string) ??
-              ""
-            }
-            onChange={(event) =>
-              table
-                .getColumn("namaPelanggan")
-                ?.setFilterValue(event.target.value)
-            }
+            value={searchTerm}
+            onChange={(event) => {
+              setSearchTerm(event.target.value);
+              setCurrentPage(1); // Reset to first page when searching
+            }}
             className="max-w-sm"
           />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Filter Kolom <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
         <div className="rounded-md border">
           <Table>
@@ -283,9 +258,11 @@ function TablePelanggan({ setOpenForm }: Props) {
                   </TableRow>
                 ))
               ) : (
-                <TableRow>
                   <TableRow>
-                    <TableCell colSpan={columns.length} className="h-24 w-full">
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 w-full text-center"
+                    >
                       {loading ? (
                         <>
                           <div className="flex items-center justify-center">
@@ -298,7 +275,6 @@ function TablePelanggan({ setOpenForm }: Props) {
                       )}
                     </TableCell>
                   </TableRow>
-                </TableRow>
               )}
             </TableBody>
           </Table>

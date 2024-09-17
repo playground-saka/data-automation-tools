@@ -1,8 +1,8 @@
 import axiosInstance from "@/lib/axios";
 
-export async function getLogsheet(page = 1, per_page = 10,month:string = ""): Promise<Model.DataTable.ResponseDt<Model.LogSheet.LogSheetData[]>> {
+export async function getLogsheet(page = 1, per_page = 10,month:string = "",search:string = ""): Promise<Model.DataTable.ResponseDt<Model.LogSheet.LogSheetData[]>> {
   const response = await axiosInstance.get(
-    `/logsheet-status?page=${page}&per_page=${per_page}&date=${month}`
+    `/logsheet-status?page=${page}&per_page=${per_page}&date=${month}&search=${search}`
   );
   return response.data;
 }

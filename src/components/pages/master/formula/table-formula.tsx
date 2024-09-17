@@ -34,6 +34,7 @@ import { getFormulas } from '@/app/api/formula'
 import { FormulaContext } from '../../../providers/FormulaProvider'
 import { toast } from '@/components/ui/use-toast'
 import { PencilIcon } from '@heroicons/react/24/outline'
+import { checkPermission } from '@/utils/permissions'
 
 type Props = {
   setOpenForm: React.Dispatch<React.SetStateAction<boolean>>
@@ -49,12 +50,6 @@ type Formula = {
 
 function TableFormula({setOpenForm}: Props) {
   const { triggerFetch, setFormula,setOpenDialogDelete } = useContext(FormulaContext);
-  const [data,setData] = useState<Model.Formula.FormulaData[]>([])
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
-  const [loading, setLoading] = useState(false);
   const columns: ColumnDef<Model.Formula.FormulaData>[] = [
     {
       accessorKey: "namaPelanggan",
@@ -140,24 +135,28 @@ function TableFormula({setOpenForm}: Props) {
         return (
           <>
             <div className="flex flex-row">
-              <div
-                onClick={() => {
-                  setFormula(row.original);
-                  setOpenForm(true);
-                }}
-                className="p-2 w-fit flex justify-end cursor-pointer"
-              >
-                <PencilIcon className="w-4 h-4" />
-              </div>
-              <div
-                onClick={() => {
-                  setFormula(row.original);
-                  setOpenDialogDelete(true);
-                }}
-                className="p-2 w-fit flex justify-end cursor-pointer text-red-500"
-              >
-                <Trash2Icon className="w-4 h-4" />
-              </div>
+              {checkPermission("master.formula.update") && (
+                <div
+                  onClick={() => {
+                    setFormula(row.original);
+                    setOpenForm(true);
+                  }}
+                  className="p-2 w-fit flex justify-end cursor-pointer"
+                >
+                  <PencilIcon className="w-4 h-4" />
+                </div>
+              )}
+              {checkPermission("master.formula.delete") && (
+                <div
+                  onClick={() => {
+                    setFormula(row.original);
+                    setOpenDialogDelete(true);
+                  }}
+                  className="p-2 w-fit flex justify-end cursor-pointer text-red-500"
+                >
+                  <Trash2Icon className="w-4 h-4" />
+                </div>
+              )}
             </div>
           </>
         );
@@ -166,30 +165,66 @@ function TableFormula({setOpenForm}: Props) {
   ];
 
 
-  const fetchData = async() => {
-    setLoading(true);
-    await getFormulas()
-    .then((res) => {
-      setData(res)
-    })
-    .catch((err) => {
-      console.log(err);
+  // const fetchData = async() => {
+  //   setLoading(true);
+  //   await getFormulas()
+  //   .then((res) => {
+  //     setData(res)
+  //   })
+  //   .catch((err) => {
+  //     console.log(err);
       
-      toast({
-        title: "Error",
-        description: err.response.data.message,
+  //     toast({
+  //       title: "Error",
+  //       description: err.response.data.message,
+  //     })
+  //   }).finally(() => {
+  //     setLoading(false);
+  //   })
+  // }
+
+  // useEffect(() => {
+  //   fetchData();
+  // }, [triggerFetch]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = React.useState({});
+
+  const [data, setData] =
+    useState<Model.DataTable.ResponseDt<Model.Formula.FormulaData[]>>();
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const fetchDataFormulas = React.useCallback(async () => {
+    setLoading(true);
+    await getFormulas(perPage, currentPage, searchTerm)
+      .then((res) => {
+        setData(res);
       })
-    }).finally(() => {
-      setLoading(false);
-    })
-  }
+      .catch((err) => {
+        console.error("Error fetching customers:", err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [currentPage, perPage, searchTerm]);
 
   useEffect(() => {
-    fetchData();
-  }, [triggerFetch]);
+    fetchDataFormulas();
+  }, [fetchDataFormulas, triggerFetch]);
 
   const table = useReactTable({
-    data,
+    data: data?.data || [],
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -212,40 +247,13 @@ function TableFormula({setOpenForm}: Props) {
       <div className="flex items-center py-4">
         <Input
           placeholder="cari berdasarkan nama..."
-          value={
-            (table.getColumn("namaPelanggan")?.getFilterValue() as string) ?? ""
-          }
-          onChange={(event) =>
-            table.getColumn("namaPelanggan")?.setFilterValue(event.target.value)
-          }
+          value={searchTerm}
+          onChange={(event) => {
+            setSearchTerm(event.target.value);
+            setCurrentPage(1); // Reset to first page when searching
+          }}
           className="max-w-sm"
         />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button type="button" variant="outline" className="ml-auto">
-              Filter Kolom <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -286,7 +294,7 @@ function TableFormula({setOpenForm}: Props) {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 w-full">
+                <TableCell colSpan={columns.length} className="h-24 w-full text-center">
                   {loading ? (
                     <>
                       <div className="flex items-center justify-center">
@@ -304,25 +312,29 @@ function TableFormula({setOpenForm}: Props) {
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="space-x-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Sebelumnya
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Selanjutnya
-          </Button>
-        </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setCurrentPage(data?.prev_page ? data?.prev_page : 1)
+              }
+              disabled={!data?.prev_page}
+            >
+              Sebelumnya
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={() =>
+                setCurrentPage(data?.next_page ? data?.next_page : 1)
+              }
+              disabled={!data?.next_page}
+            >
+              Selanjutnya
+            </Button>
+          </div>
       </div>
     </div>
   );

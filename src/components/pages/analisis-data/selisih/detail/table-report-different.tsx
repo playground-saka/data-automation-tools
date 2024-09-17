@@ -53,7 +53,7 @@ function TableReportDifferent({ id, date }: Props) {
   return (
     <div className="w-full">
       <div className="rounded-md border">
-        <div className="w-full text-center mt-5">Tabel Data Selisih</div>
+        <div className="w-full text-center p-5">Tabel Data Selisih</div>
         <Table>
           <TableHeader className="text-xs">
             <TableRow>

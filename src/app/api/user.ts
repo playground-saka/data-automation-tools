@@ -1,9 +1,24 @@
 import axiosInstance from "@/lib/axios";
 
-export async function getUsers(): Promise<
-  Model.User.UserData[]
-> {
-  const response = await axiosInstance.get("/users");
+// export async function getUsers(): Promise<
+//   Model.User.UserData[]
+// > {
+//   const response = await axiosInstance.get("/users");
+//   return response.data;
+// }
+
+export async function getUsers(
+  per_page = 10,
+  current_page = 1,
+  search = ""
+): Promise<Model.DataTable.ResponseDt<Model.User.UserData[]>> {
+  const response = await axiosInstance.get(`/users`, {
+    params: {
+      page: current_page,
+      per_page: per_page,
+      search: search
+    }
+  });
   return response.data;
 }
 

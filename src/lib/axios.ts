@@ -1,11 +1,10 @@
-import axios from "@/lib/axios";
+import axios, { AxiosInstance } from 'axios';
 import { store } from "@/store/store";
 import { setLogout } from "@/store/slices/authSlice";
 import { useRouter } from "next/router";
 
-const axiosInstance = axios.create({
-  baseURL:
-    process.env.NEXT_PUBLIC_BASE_URL,
+const axiosInstance: AxiosInstance = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL, // Explicit type annotation for axiosInstance
 });
 
 axiosInstance.defaults.headers.common["Access-Control-Allow-Origin"] = "*";

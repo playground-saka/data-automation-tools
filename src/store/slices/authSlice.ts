@@ -9,6 +9,7 @@ export const initialState: Model.Auth.AuthData = {
     fullName: "",
     email: "",
     isActive: false,
+    role: "",
   },
   permissions: [],
   menus: [],
@@ -58,6 +59,7 @@ export const authSlice = createSlice({
         username: "",
         fullName: "",
         email: "",
+        role:"",
         isActive: false,
       };
       state.permissions = [];

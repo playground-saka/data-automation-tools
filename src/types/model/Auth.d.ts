@@ -6,6 +6,7 @@ declare namespace Model {
       fullName: string;
       email: string;
       isActive: boolean;
+      role: string;
     }
 
     interface AuthData {

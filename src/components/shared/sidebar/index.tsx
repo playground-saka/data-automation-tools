@@ -144,7 +144,7 @@ function Index({}: Props) {
                 {auth.user?.fullName}
               </h1>
               <h1 className='text-xs text-stone-800/70'>
-                { toTitleCase(auth.user?.role) }
+                { auth.user?.role ? toTitleCase(auth.user.role) : '' }
                 {/* Chief Technology Officer */}
               </h1>
             </div>

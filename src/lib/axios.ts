@@ -8,7 +8,6 @@ const axiosInstance = axios.create({
     process.env.NEXT_PUBLIC_BASE_URL,
 });
 
-
 axiosInstance.defaults.headers.common["Access-Control-Allow-Origin"] = "*";
 
 axiosInstance.interceptors.request.use(

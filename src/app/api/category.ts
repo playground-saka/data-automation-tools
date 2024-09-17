@@ -1,6 +1,6 @@
 import axiosInstance from "@/lib/axios";
 
-export async function getCategories(isStatus = null): Promise<
+export async function getCategories(isStatus:number | null = null): Promise<
   Model.Category.CategoryData[]
 > {
   const response = await axiosInstance.get("/dim-kategori?is_status=" + isStatus);
